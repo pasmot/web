@@ -13,14 +13,14 @@ import {
   Store,
   TicketPercent,
   Wrench,
-} from 'lucide-react';
-import type { Product, ProductCategory } from '../types/product';
-import { categories } from '../data/categories';
-import { dealers } from '../data/dealers';
-import { featuredProductIds, getProduct, products } from '../data/products';
-import { Button } from '../components/ui/Button';
-import { StoreBadges } from '../components/ui/StoreBadges';
-import { ProductGrid } from '../components/catalog/ProductGrid';
+} from "lucide-react";
+import type { Product, ProductCategory } from "../types/product";
+import { categories } from "../data/categories";
+import { dealers } from "../data/dealers";
+import { featuredProductIds, getProduct, products } from "../data/products";
+import { Button } from "../components/ui/Button";
+import { StoreBadges } from "../components/ui/StoreBadges";
+import { ProductGrid } from "../components/catalog/ProductGrid";
 
 type LandingPageProps = {
   savedIds: string[];
@@ -32,38 +32,38 @@ type LandingPageProps = {
   onOpenInspeksi: () => void;
 };
 
-const heroProduct = getProduct('nmax-155-2022') ?? products[0];
+const heroProduct = getProduct("nmax-155-2022") ?? products[0];
 
 const APP_FEATURES = [
   {
     icon: CreditCard,
-    title: 'Checkout & Pembayaran',
-    desc: 'VA, QRIS, e-wallet, dan COD dengan perlindungan transaksi penuh.',
+    title: "Checkout & Pembayaran",
+    desc: "VA, QRIS, e-wallet, dan COD dengan perlindungan transaksi penuh.",
   },
   {
     icon: Store,
-    title: 'Seller Center',
-    desc: 'Buka kios, kelola listing, dan cairkan saldo penjualanmu.',
+    title: "Seller Center",
+    desc: "Buka kios, kelola listing, dan cairkan saldo penjualanmu.",
   },
   {
     icon: PackageSearch,
-    title: 'Transaksi & Tracking',
-    desc: 'Pantau pesanan dan status pengiriman unit secara real-time.',
+    title: "Transaksi & Tracking",
+    desc: "Pantau pesanan dan status pengiriman unit secara real-time.",
   },
   {
     icon: Bell,
-    title: 'Notifikasi Real-time',
-    desc: 'Update inspeksi, chat penjual, dan status pesanan langsung di HP.',
+    title: "Notifikasi Real-time",
+    desc: "Update inspeksi, chat penjual, dan status pesanan langsung di HP.",
   },
   {
     icon: TicketPercent,
-    title: 'Voucher & Promo',
-    desc: 'Potongan harga dan promo inspeksi khusus member Apps.',
+    title: "Voucher & Promo",
+    desc: "Potongan harga dan promo inspeksi khusus member Apps.",
   },
   {
     icon: Fingerprint,
-    title: 'eKYC & Verifikasi',
-    desc: 'Akun terverifikasi untuk transaksi besar yang lebih aman.',
+    title: "eKYC & Verifikasi",
+    desc: "Akun terverifikasi untuk transaksi besar yang lebih aman.",
   },
 ];
 
@@ -87,17 +87,13 @@ export function LandingPage({
       <section className="hero">
         <div className="container">
           <div className="hero-copy">
-            <span className="hero-eyebrow">
-              <ShieldCheck size={15} />
-              Marketplace motor terkurasi + AI
-            </span>
             <h1 className="hero-title">
               Beli, jual & cek motor dengan <em>lebih yakin</em>.
             </h1>
             <p className="hero-sub">
               Temukan motor baru, bekas, aksesoris, dan sparepart dari seller
-              terkurasi. Bandingkan produk, tanya Montir AI, chat penjual, dan ajukan
-              inspeksi sebelum mengambil keputusan.
+              terkurasi. Bandingkan produk, tanya Montir AI, chat penjual, dan
+              ajukan inspeksi sebelum mengambil keputusan.
             </p>
             <div className="hero-ctas">
               <Button size="lg" onClick={() => onExploreCatalog()}>
@@ -207,8 +203,8 @@ export function LandingPage({
               </span>
               <h2 className="section-title">Unit pilihan minggu ini</h2>
               <p className="section-sub">
-                Dipilih dari seller terverifikasi dengan data produk lengkap dan harga
-                wajar di pasaran.
+                Dipilih dari seller terverifikasi dengan data produk lengkap dan
+                harga wajar di pasaran.
               </p>
             </div>
             <Button variant="outline" onClick={() => onExploreCatalog()}>
@@ -237,8 +233,9 @@ export function LandingPage({
               </span>
               <h2>Tanya Montir AI sebelum kamu nego.</h2>
               <p>
-                Asisten yang paham motor: minta rekomendasi sesuai budget, cek risiko
-                unit bekas, bandingkan pilihan, dan tahu kapan waktunya inspeksi.
+                Asisten yang paham motor: minta rekomendasi sesuai budget, cek
+                risiko unit bekas, bandingkan pilihan, dan tahu kapan waktunya
+                inspeksi.
               </p>
               <ul className="ai-highlight-points">
                 <li>
@@ -273,8 +270,8 @@ export function LandingPage({
                   Rekomendasikan motor matic 30 jutaan
                 </div>
                 <div className="ai-demo-bubble">
-                  Di kisaran 30 jutaan, tiga matic ini paling sering jadi incaran —
-                  nyaman untuk harian dan harga jualnya stabil.
+                  Di kisaran 30 jutaan, tiga matic ini paling sering jadi
+                  incaran — nyaman untuk harian dan harga jualnya stabil.
                 </div>
                 <div className="ai-demo-product">
                   <img src={heroProduct.image} alt="" />
@@ -285,8 +282,8 @@ export function LandingPage({
                 </div>
                 <div className="ai-demo-bubble user">Kapan perlu inspeksi?</div>
                 <div className="ai-demo-bubble">
-                  Saat kamu sudah cocok dengan unit dan mau nego serius — montir bantu
-                  cek mesin, rangka, CVT, dan dokumen.
+                  Saat kamu sudah cocok dengan unit dan mau nego serius — montir
+                  bantu cek mesin, rangka, CVT, dan dokumen.
                 </div>
               </div>
             </div>
@@ -304,8 +301,8 @@ export function LandingPage({
                 Why PasarMotor
               </span>
               <h2 className="section-title">
-                Untuk buyer yang ingin lebih yakin. Untuk seller yang ingin lebih
-                dipercaya.
+                Untuk buyer yang ingin lebih yakin. Untuk seller yang ingin
+                lebih dipercaya.
               </h2>
             </div>
           </div>
@@ -316,8 +313,8 @@ export function LandingPage({
               </div>
               <h3>Aman sejak awal</h3>
               <p>
-                Identitas seller dijaga, badge verifikasi jelas, dan alur jual-beli
-                dirancang meminimalkan risiko penipuan.
+                Identitas seller dijaga, badge verifikasi jelas, dan alur
+                jual-beli dirancang meminimalkan risiko penipuan.
               </p>
             </div>
             <div className="value-card">
@@ -326,8 +323,8 @@ export function LandingPage({
               </div>
               <h3>Pasar terkurasi</h3>
               <p>
-                Motor baru & bekas, sparepart, dan aksesoris dari dealer terkurasi
-                dengan data produk yang rapi dan lengkap.
+                Motor baru & bekas, sparepart, dan aksesoris dari dealer
+                terkurasi dengan data produk yang rapi dan lengkap.
               </p>
             </div>
             <div className="value-card">
@@ -336,8 +333,8 @@ export function LandingPage({
               </div>
               <h3>Inspeksi montir</h3>
               <p>
-                Validasi kondisi mesin, rangka, CVT, kelistrikan, dan dokumen oleh
-                montir profesional sebelum kamu bayar.
+                Validasi kondisi mesin, rangka, CVT, kelistrikan, dan dokumen
+                oleh montir profesional sebelum kamu bayar.
               </p>
             </div>
             <div className="value-card">
@@ -346,8 +343,8 @@ export function LandingPage({
               </div>
               <h3>AI-assisted buying</h3>
               <p>
-                Montir AI bantu rekomendasi, cek risiko, dan bandingkan unit — dari
-                riset awal sampai keputusan akhir.
+                Montir AI bantu rekomendasi, cek risiko, dan bandingkan unit —
+                dari riset awal sampai keputusan akhir.
               </p>
             </div>
           </div>
@@ -366,17 +363,18 @@ export function LandingPage({
               Ajukan inspeksi saat kamu sudah cocok dengan unit.
             </h2>
             <p className="section-sub">
-              Montir profesional datang mengecek unit incaranmu dan memberikan laporan
-              lengkap — supaya nego berbasis kondisi nyata, bukan perasaan.
+              Montir profesional datang mengecek unit incaranmu dan memberikan
+              laporan lengkap — supaya nego berbasis kondisi nyata, bukan
+              perasaan.
             </p>
             <div className="inspeksi-scope">
               {[
-                'Mesin & suara idle',
-                'Rangka & bekas jatuh',
-                'CVT & transmisi',
-                'Kelistrikan & panel',
-                'Kelengkapan dokumen',
-                'Estimasi biaya perbaikan',
+                "Mesin & suara idle",
+                "Rangka & bekas jatuh",
+                "CVT & transmisi",
+                "Kelistrikan & panel",
+                "Kelengkapan dokumen",
+                "Estimasi biaya perbaikan",
               ].map((item) => (
                 <div className="inspeksi-scope-item" key={item}>
                   <CheckCircle2 size={16} />
@@ -420,7 +418,9 @@ export function LandingPage({
                 <BadgeCheck size={13} />
                 Dealer terverifikasi
               </span>
-              <h2 className="section-title">Dipercaya dealer & seller terkurasi</h2>
+              <h2 className="section-title">
+                Dipercaya dealer & seller terkurasi
+              </h2>
             </div>
           </div>
           <div className="trust-stats">
@@ -474,9 +474,10 @@ export function LandingPage({
               <h2 className="section-title">
                 Website untuk riset. Transaksinya di Apps.
               </h2>
-              <p className="section-sub" style={{ marginInline: 'auto' }}>
-                Di web kamu bisa menjelajah, bertanya, dan menyimpan incaran. Begitu
-                siap bertransaksi, semua kemampuan penuh PasarMotor menunggu di Apps.
+              <p className="section-sub" style={{ marginInline: "auto" }}>
+                Di web kamu bisa menjelajah, bertanya, dan menyimpan incaran.
+                Begitu siap bertransaksi, semua kemampuan penuh PasarMotor
+                menunggu di Apps.
               </p>
             </div>
 
@@ -511,8 +512,8 @@ export function LandingPage({
           <div className="final-cta">
             <h2>Siap mulai cari motor dengan lebih yakin?</h2>
             <p>
-              Jelajahi pasar motor, aksesoris, dan sparepart, lalu gunakan Montir AI
-              dan jasa inspeksi untuk membantu keputusan jual-belimu.
+              Jelajahi pasar motor, aksesoris, dan sparepart, lalu gunakan
+              Montir AI dan jasa inspeksi untuk membantu keputusan jual-belimu.
             </p>
             <div className="final-cta-actions">
               <Button size="lg" onClick={() => onExploreCatalog()}>
@@ -521,7 +522,8 @@ export function LandingPage({
               </Button>
             </div>
             <p className="final-cta-seller">
-              Checkout, Seller Center, transaksi & tracking — hanya di Apps PasarMotor.
+              Checkout, Seller Center, transaksi & tracking — hanya di Apps
+              PasarMotor.
             </p>
             <StoreBadges onDark />
           </div>
