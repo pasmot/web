@@ -1,0 +1,317 @@
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 5, 5, 0.42);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: scrim-in 220ms var(--ease-soft);
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  animation: modal-pop 340ms var(--ease-out);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  z-index: 1;
+  transition-property: background-color, color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: var(--ease-soft);
+}
+
+.modal-close:hover {
+  background: rgba(5, 5, 5, 0.06);
+  color: var(--color-ink);
+}
+
+.modal-close:active {
+  transform: scale(0.92);
+}
+
+.modal-body {
+  padding: 30px;
+}
+
+/* ---------- Login gate ---------- */
+
+.login-gate {
+  text-align: center;
+}
+
+.login-gate-logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  object-fit: contain;
+  outline: none;
+}
+
+.login-gate h2 {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.login-gate-feature {
+  margin: 14px auto 6px;
+}
+
+.login-gate p {
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.6;
+  max-width: 330px;
+  margin: 0 auto;
+}
+
+.google-btn {
+  margin-top: 22px;
+  width: 100%;
+  min-height: 50px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), 0 2px 6px rgba(5, 5, 5, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-ink);
+  transition-property: box-shadow, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-soft);
+}
+
+.google-btn:hover {
+  box-shadow: inset 0 0 0 1px #d4d4d8, 0 6px 16px rgba(5, 5, 5, 0.09);
+}
+
+.google-btn:active {
+  transform: scale(0.97);
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+  outline: none;
+}
+
+.login-gate-terms {
+  margin-top: 16px;
+  font-size: 11.5px;
+  color: var(--color-faint);
+}
+
+/* ---------- Form modal (inspeksi) ---------- */
+
+.form-modal h2 {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.form-modal > p {
+  font-size: 13.5px;
+  color: var(--color-muted);
+  margin-bottom: 20px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 7px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  font-size: 14px;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 160ms var(--ease-soft);
+  appearance: none;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  box-shadow: inset 0 0 0 1.5px var(--brand-red);
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: var(--color-faint);
+}
+
+.form-product-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg);
+  border-radius: 20px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+
+.form-product-pill img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.form-product-pill strong {
+  font-size: 13.5px;
+  display: block;
+}
+
+.form-product-pill small {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ---------- Success state ---------- */
+
+.modal-success {
+  text-align: center;
+  padding: 14px 0 4px;
+}
+
+.modal-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  animation: modal-pop 420ms var(--ease-out);
+}
+
+.modal-success h2 {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.modal-success p {
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--color-muted);
+  line-height: 1.6;
+  max-width: 300px;
+  margin-inline: auto;
+}
+
+/* ---------- Contact seller (WA) ---------- */
+
+.wa-modal h2 {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.wa-modal-seller {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 18px 0;
+}
+
+.wa-modal-seller .pdp-dealer-avatar {
+  width: 44px;
+  height: 44px;
+}
+
+.wa-modal-seller strong {
+  font-size: 14.5px;
+  display: block;
+}
+
+.wa-modal-seller small {
+  font-size: 12.5px;
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wa-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+  display: inline-block;
+}
+
+.wa-message-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-bottom: 7px;
+}
+
+.wa-message-preview {
+  background: var(--color-bg);
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 5px;
+  padding: 13px 15px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+.btn-wa {
+  background: #25d366;
+  color: #fff;
+}
+
+.btn-wa:hover {
+  background: #1fb958;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 4px;
+}
