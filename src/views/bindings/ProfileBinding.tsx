@@ -23,6 +23,7 @@ export function ProfileBinding() {
       inspeksiCount={app.inspeksiRequests.length}
       chatCount={app.chat.userMessageCount}
       onLogout={app.handleLogout}
+      onToast={app.pushToast}
     />
   );
 }

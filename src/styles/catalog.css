@@ -378,6 +378,28 @@
   margin-bottom: 16px;
 }
 
+/* JS-distributed visual masonry — stable on lazy-load (no rebalance/reorder) */
+.product-masonry {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.product-masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .product-masonry,
+  .product-masonry-col {
+    gap: 12px;
+  }
+}
+
 .product-card-visual .product-card-media {
   display: block;
   width: 100%;
@@ -906,6 +928,13 @@
   color: var(--color-faint);
 }
 
+.profile-bio {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1080,4 +1109,50 @@
   .profile-stats {
     grid-template-columns: 1fr;
   }
+}
+
+/* Infinite-scroll footer (load-more sentinel) */
+.catalog-loadmore {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 56px;
+  margin-top: 24px;
+}
+
+.catalog-loadmore-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.catalog-loadmore .spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fallback when a listing photo fails to load */
+.img-fallback {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 120px;
+  background:
+    radial-gradient(circle at 30% 25%, #fff 0%, transparent 60%),
+    linear-gradient(135deg, #eef0f3, #e2e5ea);
+  color: #9aa1ad;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  padding: 12px;
 }

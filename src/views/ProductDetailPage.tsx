@@ -11,9 +11,10 @@ import {
 } from 'lucide-react';
 import type { Product } from '../types/product';
 import { getDealer } from '../data/dealers';
-import { products } from '../data/products';
+import { fetchCatalog } from '../lib/api';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { ProductImage } from '../components/ui/ProductImage';
 import { ProductGrid } from '../components/catalog/ProductGrid';
 
 type ProductDetailPageProps = {
@@ -38,6 +39,7 @@ export function ProductDetailPage({
   onOpenDealer,
 }: ProductDetailPageProps) {
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [similar, setSimilar] = useState<Product[]>([]);
   const dealer = getDealer(product.seller);
   const saved = savedIds.includes(product.id);
   const isMotor = product.category === 'motor';
@@ -47,10 +49,24 @@ export function ProductDetailPage({
     window.scrollTo({ top: 0 });
   }, [product.id]);
 
+  // Live "produk serupa" from the same category.
+  useEffect(() => {
+    let active = true;
+    fetchCatalog({ category: product.category, limit: 8 })
+      .then(({ items }) => {
+        if (active) {
+          setSimilar(items.filter((p) => p.id !== product.id).slice(0, 4));
+        }
+      })
+      .catch(() => {
+        if (active) setSimilar([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [product.id, product.category]);
+
   const gallery = product.gallery.length > 0 ? product.gallery : [product.image];
-  const similar = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
 
   const step = (dir: 1 | -1) => {
     setGalleryIndex((i) => (i + dir + gallery.length) % gallery.length);
@@ -60,11 +76,13 @@ export function ProductDetailPage({
   // deskripsi — bukan card khusus — karena data listing bisa tidak lengkap.
   const conditionLabel = /Bekas/i.test(product.tag) ? 'Bekas' : 'Baru';
   const updatedLabel = 'Kemarin';
-  const productDescription = isMotor
+  // Live listings carry a real description; mock units synthesise one from specs.
+  const fallbackDescription = isMotor
     ? `${product.title} tahun ${product.year} dengan pemakaian ${product.mileage}${
         product.cc ? ` dan mesin ${product.cc} cc` : ''
       }. Kondisi terawat, kelengkapan surat aman, dan siap pakai harian. Bisa cek kondisi lebih detail lewat Montir AI atau ajukan inspeksi sebelum transaksi.`
     : `${product.title} kondisi ${conditionLabel.toLowerCase()} dan siap pakai sesuai deskripsi. Kompatibilitas serta detail produk bisa dikonsultasikan dulu lewat Montir AI sebelum membeli.`;
+  const productDescription = product.description?.trim() || fallbackDescription;
   const productSpecs = [
     { label: 'Kondisi', value: conditionLabel },
     { label: 'Kategori', value: product.tag },
@@ -83,7 +101,7 @@ export function ProductDetailPage({
           {/* Gallery */}
           <div>
             <div className="pdp-gallery-main">
-              <img src={gallery[galleryIndex]} alt={product.title} />
+              <ProductImage src={gallery[galleryIndex]} alt={product.title} />
               <div className="pdp-photo-count">
                 {galleryIndex + 1} / {gallery.length}
               </div>
@@ -115,7 +133,7 @@ export function ProductDetailPage({
                     onClick={() => setGalleryIndex(i)}
                     aria-label={`Foto ${i + 1}`}
                   >
-                    <img src={src} alt="" />
+                    <ProductImage src={src} alt="" compact />
                   </button>
                 ))}
               </div>
@@ -175,7 +193,7 @@ export function ProductDetailPage({
 
             <div className="pdp-desc">
               <h3>Deskripsi</h3>
-              <p>{productDescription}</p>
+              <p style={{ whiteSpace: 'pre-line' }}>{productDescription}</p>
             </div>
 
             <div className="pdp-desc">

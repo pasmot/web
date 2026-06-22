@@ -63,6 +63,44 @@ export function FilterPanel({ filters, onChange, sheetOpen = false }: FilterPane
   );
 }
 
+/** Maps the "Harga" chip to API price bounds (in rupiah). */
+export function priceRangeFor(harga: string): {
+  minPrice?: number;
+  maxPrice?: number;
+} {
+  switch (harga) {
+    case '< 10 Juta':
+      return { maxPrice: 9_999_999 };
+    case '10–25 Juta':
+      return { minPrice: 10_000_000, maxPrice: 25_000_000 };
+    case '25–40 Juta':
+      return { minPrice: 25_000_000, maxPrice: 40_000_000 };
+    case '> 40 Juta':
+      return { minPrice: 40_000_001 };
+    default:
+      return {};
+  }
+}
+
+/** Maps the "Tahun" chip to API year bounds. */
+export function yearRangeFor(tahun: string): {
+  yearMin?: number;
+  yearMax?: number;
+} {
+  switch (tahun) {
+    case '2024–2025':
+      return { yearMin: 2024, yearMax: 2025 };
+    case '2021–2023':
+      return { yearMin: 2021, yearMax: 2023 };
+    case '2018–2020':
+      return { yearMin: 2018, yearMax: 2020 };
+    case '< 2018':
+      return { yearMax: 2017 };
+    default:
+      return {};
+  }
+}
+
 export function applyFilters<
   T extends {
     tag: string;

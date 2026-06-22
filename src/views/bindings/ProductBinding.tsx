@@ -19,7 +19,7 @@ export function ProductBinding({ product }: { product: Product }) {
     <ProductDetailPage
       product={product}
       savedIds={app.savedIds}
-      onBackToCatalog={() => app.exploreCatalog()}
+      onBackToCatalog={app.backToCatalog}
       onOpenProduct={app.openProduct}
       onToggleSave={app.toggleSave}
       onRequestInspeksi={(p) => app.requestInspeksi(p)}

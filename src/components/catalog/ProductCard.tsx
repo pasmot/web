@@ -1,6 +1,7 @@
 import { Bookmark, MapPin, Star } from 'lucide-react';
 import type { Product } from '../../types/product';
 import { Badge } from '../ui/Badge';
+import { ProductImage } from '../ui/ProductImage';
 
 type ProductCardProps = {
   product: Product;
@@ -47,7 +48,11 @@ export function ProductCard({
           aria-label={product.title}
           title={product.title}
         >
-          <img src={product.image} alt={product.title} style={{ height: mediaHeight }} />
+          <ProductImage
+            src={product.image}
+            alt={product.title}
+            style={{ height: mediaHeight }}
+          />
         </button>
         <button
           className={`product-card-save ${saved ? 'saved' : ''}`}
@@ -72,7 +77,11 @@ export function ProductCard({
         onClick={() => onOpen(product)}
         aria-label={product.title}
       >
-        <img src={product.image} alt={product.title} style={{ height: mediaHeight }} />
+        <ProductImage
+          src={product.image}
+          alt={product.title}
+          style={{ height: mediaHeight }}
+        />
         <span className="product-card-tag">
           <Badge tone={product.tag === 'Motor Baru' ? 'red' : 'dark'}>{product.tag}</Badge>
         </span>

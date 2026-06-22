@@ -83,6 +83,7 @@ export function Shell({ children }: { children: ReactNode }) {
         featureName={app.gateFeature}
         onClose={app.closeGate}
         onLogin={app.handleGateLogin}
+        onToken={app.handleGateToken}
       />
 
       <InspeksiFormModal

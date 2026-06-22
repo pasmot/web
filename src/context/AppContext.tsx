@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import type { AppView, InspeksiRequest, PendingAction } from '../types/app';
 import type { Product, ProductCategory } from '../types/product';
 import { getProduct } from '../data/products';
-import { useMockAuth, type MockUser } from '../hooks/useMockAuth';
+import { useAuth, type AuthUser } from '../hooks/useAuth';
 import { useMontirChat, type MontirChat } from '../hooks/useMontirChat';
 import { useRouter } from 'next/navigation';
 import { VIEW_PATHS, productPath, dealerPath, catalogPath } from '../lib/routes';
@@ -33,7 +33,7 @@ let inspeksiCounter = 0;
 
 type AppContextValue = {
   isLoggedIn: boolean;
-  user: MockUser;
+  user: AuthUser;
   savedIds: string[];
   inspeksiRequests: InspeksiRequest[];
   chat: MontirChat;
@@ -50,6 +50,8 @@ type AppContextValue = {
   openProduct: (product: Product) => void;
   openDealer: (dealerId: string) => void;
   exploreCatalog: (category?: ProductCategory, query?: string) => void;
+  /** Go back to the catalog, preserving its scroll/filters via history. */
+  backToCatalog: () => void;
   openFullChat: () => void;
 
   // tier-2 (gated) actions
@@ -67,6 +69,8 @@ type AppContextValue = {
   openLogin: () => void;
   closeGate: () => void;
   handleGateLogin: () => void;
+  /** Manual token fallback (paste a JWT) — returns false if invalid. */
+  handleGateToken: (token: string) => boolean;
 
   // inspeksi form modal
   inspeksiFormOpen: boolean;
@@ -98,7 +102,7 @@ export function useApp(): AppContextValue {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { isLoggedIn, user, login, logout } = useMockAuth();
+  const { isLoggedIn, user, login, loginWithToken, logout } = useAuth();
 
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [inspeksiRequests, setInspeksiRequests] = useState<InspeksiRequest[]>([]);
@@ -134,8 +138,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   /* ---------- Navigation ---------- */
 
+  // Tracks whether we've navigated within the app, so "back" can safely use
+  // browser history (and fall back to a push on a cold deep-link).
+  const hasInternalHistory = useRef(false);
+
   const navigate = useCallback(
     (next: AppView) => {
+      hasInternalHistory.current = true;
       router.push(VIEW_PATHS[next as keyof typeof VIEW_PATHS] ?? '/');
     },
     [router],
@@ -143,6 +152,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const openProduct = useCallback(
     (product: Product) => {
+      hasInternalHistory.current = true;
       setDockExpandedState(false);
       router.push(productPath(product.id));
     },
@@ -151,6 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const openDealer = useCallback(
     (dealerId: string) => {
+      hasInternalHistory.current = true;
       router.push(dealerPath(dealerId));
     },
     [router],
@@ -158,10 +169,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const exploreCatalog = useCallback(
     (category?: ProductCategory, query?: string) => {
+      hasInternalHistory.current = true;
       router.push(catalogPath(category ?? null, query));
     },
     [router],
   );
+
+  const backToCatalog = useCallback(() => {
+    setDockExpandedState(false);
+    if (hasInternalHistory.current) {
+      router.back();
+    } else {
+      router.push(VIEW_PATHS.catalog);
+    }
+  }, [router]);
 
   /* ---------- Login gate orchestration ---------- */
 
@@ -224,12 +245,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGateOpen(true);
   }, []);
 
+  // Google OAuth — full-page redirect; the app captures ?token= on return.
   const handleGateLogin = useCallback(() => {
-    setGateOpen(false);
-    setGateFeature(null);
     login();
-    pushToast('Berhasil masuk — selamat datang!');
-  }, [login, pushToast]);
+  }, [login]);
+
+  // Manual token fallback: log in immediately so the pending action resumes.
+  const handleGateToken = useCallback(
+    (token: string): boolean => {
+      const ok = loginWithToken(token);
+      if (ok) {
+        setGateOpen(false);
+        setGateFeature(null);
+        pushToast('Berhasil masuk — selamat datang!');
+      }
+      return ok;
+    },
+    [loginWithToken, pushToast],
+  );
 
   const closeGate = useCallback(() => {
     setGateOpen(false);
@@ -370,6 +403,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openProduct,
     openDealer,
     exploreCatalog,
+    backToCatalog,
     openFullChat,
     toggleSave,
     requestInspeksi,
@@ -383,6 +417,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openLogin,
     closeGate,
     handleGateLogin,
+    handleGateToken,
     inspeksiFormOpen,
     inspeksiFormProduct,
     closeInspeksiForm: () => setInspeksiFormOpen(false),

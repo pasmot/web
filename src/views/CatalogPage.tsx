@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Search, SearchX, SlidersHorizontal, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Loader2, Search, SearchX, SlidersHorizontal, WifiOff, X } from 'lucide-react';
 import type { Product, ProductCategory } from '../types/product';
-import { products } from '../data/products';
 import { searchSuggestions } from '../data/categories';
+import { useCatalogListings } from '../hooks/useCatalogListings';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import {
   applyFilters,
   DEFAULT_FILTERS,
   FilterPanel,
+  priceRangeFor,
+  yearRangeFor,
   type CatalogFilters,
 } from '../components/catalog/FilterPanel';
 import { ProductGrid } from '../components/catalog/ProductGrid';
@@ -29,6 +31,18 @@ const CATEGORY_CHIPS: { id: ProductCategory | 'semua'; label: string }[] = [
   { id: 'aksesoris', label: 'Aksesoris' },
 ];
 
+// Remembers the catalog UI (chips/search/filters) across client navigation so
+// returning from a detail page restores the same view, not a reset one. Bound
+// to the URL params it was opened with, so a fresh deep-link starts clean.
+type CatalogUI = {
+  initialCategory: ProductCategory | null;
+  initialQuery: string;
+  category: ProductCategory | 'semua';
+  query: string;
+  filters: CatalogFilters;
+};
+let catalogUI: CatalogUI | null = null;
+
 export function CatalogPage({
   savedIds,
   initialCategory,
@@ -36,45 +50,77 @@ export function CatalogPage({
   onOpenProduct,
   onToggleSave,
 }: CatalogPageProps) {
+  const restored =
+    catalogUI &&
+    catalogUI.initialCategory === initialCategory &&
+    catalogUI.initialQuery === initialQuery
+      ? catalogUI
+      : null;
+
   const [category, setCategory] = useState<ProductCategory | 'semua'>(
-    initialCategory ?? 'semua',
+    restored?.category ?? initialCategory ?? 'semua',
   );
-  const [query, setQuery] = useState(initialQuery);
-  const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
+  const [query, setQuery] = useState(restored?.query ?? initialQuery);
+  const [filters, setFilters] = useState<CatalogFilters>(
+    restored?.filters ?? DEFAULT_FILTERS,
+  );
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const debouncedQuery = useDebouncedValue(query, 200);
+  const debouncedQuery = useDebouncedValue(query, 300);
 
+  // Persist the UI so a later remount (back from detail) can restore it.
   useEffect(() => {
-    const t = window.setTimeout(() => setLoading(false), 650);
-    return () => window.clearTimeout(t);
-  }, []);
+    catalogUI = { initialCategory, initialQuery, category, query, filters };
+  }, [initialCategory, initialQuery, category, query, filters]);
 
+  // Server-side: category, search, price (Harga), year (Tahun) and city (Lokasi).
+  const { minPrice, maxPrice } = priceRangeFor(filters.harga);
+  const { yearMin, yearMax } = yearRangeFor(filters.tahun);
+  const {
+    products: fetched,
+    loading,
+    loadingMore,
+    error,
+    total,
+    hasMore,
+    loadMore,
+    reload,
+  } = useCatalogListings({
+    category: category === 'semua' ? null : category,
+    query: debouncedQuery,
+    minPrice,
+    maxPrice,
+    yearMin,
+    yearMax,
+    city: filters.lokasi === 'Semua' ? undefined : filters.lokasi,
+  });
+
+  // Client-side refine only for what the API can't do (Jenis/condition).
+  const results = useMemo(
+    () =>
+      applyFilters(fetched, {
+        ...filters,
+        harga: 'Semua',
+        lokasi: 'Semua',
+        tahun: 'Semua',
+      }),
+    [fetched, filters],
+  );
+
+  // Auto-load the next page when the sentinel scrolls into view.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    setCategory(initialCategory ?? 'semua');
-  }, [initialCategory]);
-
-  useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
-
-  const results = useMemo(() => {
-    let list = products;
-    if (category !== 'semua') {
-      list = list.filter((p) => p.category === category);
-    }
-    if (debouncedQuery.trim()) {
-      const q = debouncedQuery.trim().toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.tag.toLowerCase().includes(q) ||
-          p.location.toLowerCase().includes(q),
-      );
-    }
-    return applyFilters(list, filters);
-  }, [category, debouncedQuery, filters]);
+    const el = sentinelRef.current;
+    if (!el || !hasMore || loading || error) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '600px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, error, loadMore]);
 
   return (
     <div className="catalog-page">
@@ -84,7 +130,9 @@ export function CatalogPage({
           <p className="catalog-sub">
             {loading
               ? 'Memuat unit terkurasi…'
-              : `${results.length} produk terkurasi siap dibandingkan`}
+              : error
+                ? 'Gagal terhubung ke server'
+                : `${total.toLocaleString('id-ID')} produk terkurasi siap dibandingkan`}
           </p>
         </div>
 
@@ -133,7 +181,18 @@ export function CatalogPage({
           <FilterPanel filters={filters} onChange={setFilters} />
 
           <div>
-            {!loading && results.length === 0 ? (
+            {!loading && error ? (
+              <EmptyState
+                icon={<WifiOff size={26} />}
+                title="Gagal memuat katalog"
+                description="Tidak bisa terhubung ke server PasarMotor saat ini. Periksa koneksi lalu coba lagi."
+                action={
+                  <Button variant="soft" onClick={reload}>
+                    Coba lagi
+                  </Button>
+                }
+              />
+            ) : !loading && results.length === 0 ? (
               <EmptyState
                 icon={<SearchX size={26} />}
                 title="Tidak ada hasil"
@@ -152,14 +211,36 @@ export function CatalogPage({
                 }
               />
             ) : (
-              <ProductGrid
-                products={results}
-                savedIds={savedIds}
-                onOpen={onOpenProduct}
-                onToggleSave={onToggleSave}
-                loading={loading}
-                visual
-              />
+              <>
+                <ProductGrid
+                  products={results}
+                  savedIds={savedIds}
+                  onOpen={onOpenProduct}
+                  onToggleSave={onToggleSave}
+                  loading={loading}
+                  visual
+                />
+
+                {/* Infinite-scroll sentinel + status */}
+                {!loading && !error && (
+                  <div ref={sentinelRef} className="catalog-loadmore">
+                    {loadingMore ? (
+                      <span className="catalog-loadmore-status">
+                        <Loader2 size={16} className="spin" />
+                        Memuat lebih banyak…
+                      </span>
+                    ) : hasMore ? (
+                      <Button variant="outline" onClick={loadMore}>
+                        Muat lebih banyak
+                      </Button>
+                    ) : results.length > 0 ? (
+                      <span className="catalog-loadmore-status">
+                        Semua produk sudah ditampilkan
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+              </>
             )}
 
             {!loading && results.length > 0 && query.trim() === '' && (
