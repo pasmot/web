@@ -1,13 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 import type { ChatMessage, ChatMode } from '../types/chat';
 import type { Product } from '../types/product';
-import {
-  CHAT_FREE_LIMIT,
-  getMockReply,
-  getProductAdviceOpener,
-} from '../data/chatMocks';
+import { CHAT_FREE_LIMIT } from '../data/chatMocks';
+import { ChatError, resetSessionId, sendChat } from '../lib/chat';
 
-let userMsgCounter = 0;
+let msgCounter = 0;
+const nextId = (role: string) => `${role}-${++msgCounter}`;
 
 export type MontirChat = ReturnType<typeof useMontirChat>;
 
@@ -18,8 +16,9 @@ type UseMontirChatArgs = {
 };
 
 /**
- * Single chat session shared by the floating dock and the full chat view.
- * Quota counts USER messages only, per session (resets on reload).
+ * Single chat session (dock + full view) backed by the live Montir AI API.
+ * Guests get a few free messages before the login gate; the API enforces a
+ * hard 5-questions-per-session cap (questions_remaining → limitReached).
  */
 export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -27,77 +26,97 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
   const [contextProduct, setContextProduct] = useState<Product | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [userMessageCount, setUserMessageCount] = useState(0);
-  const typingTimer = useRef<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+
+  // Product id whose context has already been sent (the API remembers history,
+  // so context is only prepended to the first message of a product chat).
+  const contextSentRef = useRef<string | null>(null);
 
   const remainingFree = Math.max(0, CHAT_FREE_LIMIT - userMessageCount);
 
-  const queueReply = useCallback(
-    (text: string, replyMode: ChatMode, product: Product | null) => {
-      setIsTyping(true);
-      if (typingTimer.current) window.clearTimeout(typingTimer.current);
-      typingTimer.current = window.setTimeout(() => {
-        setMessages((prev) => [...prev, ...getMockReply(text, replyMode, product)]);
-        setIsTyping(false);
-      }, 1600);
-    },
-    [],
-  );
-
-  /**
-   * Send a user message. Returns false when blocked by the login gate
-   * (the message is handed to onGateHit as the pending action).
-   */
   const sendMessage = useCallback(
     (rawText: string): boolean => {
       const text = rawText.trim();
-      if (!text || isTyping) return false;
+      if (!text || isTyping || limitReached) return false;
 
+      // Guest login gate (encourages sign-in before the free quota runs out).
       if (!isLoggedIn && userMessageCount >= CHAT_FREE_LIMIT) {
         onGateHit(text);
         return false;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { id: `user-${++userMsgCounter}`, role: 'user', text },
-      ]);
-      setUserMessageCount((c) => c + 1);
-      queueReply(text, mode, contextProduct);
+      setMessages((prev) => [...prev, { id: nextId('user'), role: 'user', text }]);
+      setError(null);
+      setIsTyping(true);
+
+      // Fold product context into the first message of a product-advice chat.
+      let apiMessage = text;
+      const ctx = contextProduct;
+      if (mode === 'product-advice' && ctx && contextSentRef.current !== ctx.id) {
+        const parts = [
+          `Saya sedang melihat listing "${ctx.title}"`,
+          ctx.year ? `tahun ${ctx.year}` : '',
+          `harga ${ctx.price}`,
+          `lokasi ${ctx.location}`,
+        ].filter(Boolean);
+        apiMessage = `${parts.join(', ')}. ${text}`;
+      }
+
+      sendChat(apiMessage)
+        .then(({ answer, questionsRemaining }) => {
+          if (mode === 'product-advice' && ctx) contextSentRef.current = ctx.id;
+          setMessages((prev) => [
+            ...prev,
+            { id: nextId('assistant'), role: 'assistant', text: answer },
+          ]);
+          setUserMessageCount((c) => c + 1);
+          setRemaining(questionsRemaining);
+          if (questionsRemaining <= 0) setLimitReached(true);
+        })
+        .catch((err: unknown) => {
+          const message =
+            err instanceof Error ? err.message : 'Terjadi kesalahan pada Montir AI.';
+          setError(message);
+          if (err instanceof ChatError && err.limitReached) setLimitReached(true);
+        })
+        .finally(() => setIsTyping(false));
+
       return true;
     },
-    [isLoggedIn, isTyping, userMessageCount, mode, contextProduct, onGateHit, queueReply],
+    [isLoggedIn, isTyping, limitReached, userMessageCount, mode, contextProduct, onGateHit],
   );
 
-  /**
-   * Open chat in product-advice mode. Injects a context opener exchange
-   * (not counted against the free quota — it is system-generated).
-   */
+  /** Enter product-advice mode. No API call — context rides the next message. */
   const openWithProduct = useCallback(
     (product: Product) => {
       setMode('product-advice');
-      if (contextProduct?.id === product.id) return;
-      setContextProduct(product);
-      setMessages((msgs) => [
-        ...msgs,
-        {
-          id: `user-${++userMsgCounter}`,
-          role: 'user',
-          text: `Aku lagi lihat ${product.title} (${product.year} · ${product.mileage}). Apa saja yang perlu aku cek?`,
-        },
-      ]);
-      setIsTyping(true);
-      if (typingTimer.current) window.clearTimeout(typingTimer.current);
-      typingTimer.current = window.setTimeout(() => {
-        setMessages((msgs) => [...msgs, ...getProductAdviceOpener(product)]);
-        setIsTyping(false);
-      }, 1600);
+      setContextProduct((cur) => {
+        if (cur?.id !== product.id) contextSentRef.current = null;
+        return product;
+      });
     },
-    [contextProduct],
+    [],
   );
 
   const clearContext = useCallback(() => {
     setContextProduct(null);
     setMode('recommendation');
+    contextSentRef.current = null;
+  }, []);
+
+  /** Start a fresh conversation (new session id, blank slate). */
+  const resetSession = useCallback(() => {
+    resetSessionId();
+    setMessages([]);
+    setError(null);
+    setLimitReached(false);
+    setRemaining(null);
+    setUserMessageCount(0);
+    setMode('recommendation');
+    setContextProduct(null);
+    contextSentRef.current = null;
   }, []);
 
   return {
@@ -107,8 +126,13 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
     isTyping,
     userMessageCount,
     remainingFree,
+    /** Questions left in the API session (null until the first reply). */
+    remaining,
+    limitReached,
+    error,
     sendMessage,
     openWithProduct,
     clearContext,
+    resetSession,
   };
 }

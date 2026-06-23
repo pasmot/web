@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowUp, Sparkles, X } from 'lucide-react';
+import { AlertCircle, ArrowUp, RotateCcw, Sparkles, X } from 'lucide-react';
 import type { MontirChat } from '../hooks/useMontirChat';
 import type { Product } from '../types/product';
 import {
@@ -72,11 +72,17 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
             isTyping={chat.isTyping}
             onOpenProduct={onOpenProduct}
           />
-          {showQuota && (
+          {chat.error && (
+            <div className="chat-error">
+              <AlertCircle size={13} />
+              {chat.error}
+            </div>
+          )}
+          {showQuota && !chat.limitReached && (
             <div className="chat-quota">
               <Sparkles size={13} />
               {chat.remainingFree > 0
-                ? `Sisa ${chat.remainingFree} pesan gratis — login untuk lanjut tanpa batas`
+                ? `Sisa ${chat.remainingFree} pesan gratis — login untuk lanjut`
                 : 'Kuota gratis habis — login untuk lanjut chat'}
             </div>
           )}
@@ -85,38 +91,51 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
 
       <div className="chat-page-composer">
         <div className="chat-page-composer-inner">
-          {!chat.isTyping && (
-            <div className="chat-chips">
-              {chips.map((chip) => (
-                <button key={chip} className="chat-chip" onClick={() => send(chip)}>
-                  {chip}
-                </button>
-              ))}
+          {chat.limitReached ? (
+            <div className="chat-reset">
+              <p>Kuota pertanyaan sesi ini sudah habis.</p>
+              <button className="chat-reset-btn" onClick={chat.resetSession}>
+                <RotateCcw size={15} />
+                Mulai percakapan baru
+              </button>
             </div>
+          ) : (
+            <>
+              {!chat.isTyping && (
+                <div className="chat-chips">
+                  {chips.map((chip) => (
+                    <button key={chip} className="chat-chip" onClick={() => send(chip)}>
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <form
+                className="chat-page-composer-row"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  send(draft);
+                }}
+              >
+                <input
+                  ref={inputRef}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  disabled={chat.isTyping}
+                  placeholder={montirIntro.composerPlaceholder}
+                  aria-label={montirIntro.composerPlaceholder}
+                />
+                <button
+                  type="submit"
+                  className={`montir-send ${draft.trim() ? 'ready' : ''}`}
+                  disabled={!draft.trim() || chat.isTyping}
+                  aria-label="Kirim"
+                >
+                  <ArrowUp size={19} />
+                </button>
+              </form>
+            </>
           )}
-          <form
-            className="chat-page-composer-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              send(draft);
-            }}
-          >
-            <input
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder={montirIntro.composerPlaceholder}
-              aria-label={montirIntro.composerPlaceholder}
-            />
-            <button
-              type="submit"
-              className={`montir-send ${draft.trim() ? 'ready' : ''}`}
-              disabled={!draft.trim()}
-              aria-label="Kirim"
-            >
-              <ArrowUp size={19} />
-            </button>
-          </form>
         </div>
       </div>
     </div>

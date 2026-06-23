@@ -505,6 +505,9 @@
   border-radius: 18px 18px 18px 6px;
   background: var(--color-bg);
   color: var(--color-text);
+  /* AI answers carry newlines; render as text (no HTML) but keep line breaks. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .chat-msg.user .chat-bubble {
@@ -731,6 +734,55 @@
   margin: 0 auto;
   width: fit-content;
   animation: chat-reveal 300ms var(--ease-out);
+}
+
+.chat-error {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-danger, #dc2626);
+  background: var(--color-danger-soft, rgba(220, 38, 38, 0.08));
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  margin: 8px auto 0;
+  width: fit-content;
+  max-width: 100%;
+  text-align: center;
+  animation: chat-reveal 300ms var(--ease-out);
+}
+
+.chat-reset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.chat-reset p {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.chat-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--color-ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-reset-btn:hover {
+  opacity: 0.9;
 }
 
 /* ---------- Full chat page ---------- */

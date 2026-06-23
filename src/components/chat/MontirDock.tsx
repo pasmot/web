@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUp, Maximize2, Minus, Sparkles, X } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowUp,
+  Maximize2,
+  Minus,
+  RotateCcw,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import { ChatThread } from './ChatThread';
 import type { MontirChat } from '../../hooks/useMontirChat';
 import type { Product } from '../../types/product';
@@ -132,17 +140,23 @@ export function MontirDock({
                 isTyping={chat.isTyping}
                 onOpenProduct={onOpenProduct}
               />
-              {showQuota && (
+              {chat.error && (
+                <div className="chat-error">
+                  <AlertCircle size={13} />
+                  {chat.error}
+                </div>
+              )}
+              {showQuota && !chat.limitReached && (
                 <div className="chat-quota">
                   <Sparkles size={13} />
                   {chat.remainingFree > 0
-                    ? `Sisa ${chat.remainingFree} pesan gratis — login untuk lanjut tanpa batas`
+                    ? `Sisa ${chat.remainingFree} pesan gratis — login untuk lanjut`
                     : 'Kuota gratis habis — login untuk lanjut chat'}
                 </div>
               )}
             </div>
 
-            {!chat.isTyping && (
+            {!chat.isTyping && !chat.limitReached && (
               <div className="chat-chips">
                 {chips.map((chip) => (
                   <button key={chip} className="chat-chip" onClick={() => send(chip)}>
@@ -154,34 +168,45 @@ export function MontirDock({
           </>
         )}
 
-        <form
-          className="montir-composer"
-          onSubmit={(e) => {
-            e.preventDefault();
-            send(draft);
-          }}
-        >
-          <input
-            ref={inputRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onFocus={() => {
-              if (!expanded) onExpandChange(true);
+        {expanded && chat.limitReached ? (
+          <div className="chat-reset">
+            <p>Kuota pertanyaan sesi ini sudah habis.</p>
+            <button className="chat-reset-btn" onClick={chat.resetSession}>
+              <RotateCcw size={15} />
+              Mulai percakapan baru
+            </button>
+          </div>
+        ) : (
+          <form
+            className="montir-composer"
+            onSubmit={(e) => {
+              e.preventDefault();
+              send(draft);
             }}
-            placeholder={montirIntro.dockPlaceholder}
-            aria-label={montirIntro.dockPlaceholder}
-            tabIndex={isMini ? -1 : 0}
-          />
-          <button
-            type="submit"
-            className={`montir-send ${draft.trim() ? 'ready' : ''}`}
-            disabled={!draft.trim()}
-            aria-label="Kirim"
-            tabIndex={isMini ? -1 : 0}
           >
-            <ArrowUp size={19} />
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onFocus={() => {
+                if (!expanded) onExpandChange(true);
+              }}
+              disabled={expanded && chat.isTyping}
+              placeholder={montirIntro.dockPlaceholder}
+              aria-label={montirIntro.dockPlaceholder}
+              tabIndex={isMini ? -1 : 0}
+            />
+            <button
+              type="submit"
+              className={`montir-send ${draft.trim() ? 'ready' : ''}`}
+              disabled={!draft.trim() || (expanded && chat.isTyping)}
+              aria-label="Kirim"
+              tabIndex={isMini ? -1 : 0}
+            >
+              <ArrowUp size={19} />
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
