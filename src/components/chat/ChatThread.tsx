@@ -1,8 +1,18 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 import type { ChatMessage } from '../../types/chat';
 import type { Product } from '../../types/product';
 import { montirIntro } from '../../data/chatMocks';
+
+// Lazily loaded so react-markdown is fetched only when an AI answer renders —
+// keeps it out of the app-wide bundle (MontirDock ships in every page's shell).
+const MarkdownText = dynamic(
+  () => import('./MarkdownText').then((m) => m.MarkdownText),
+  { ssr: false },
+);
 
 type ChatThreadProps = {
   messages: ChatMessage[];
@@ -41,7 +51,15 @@ export function ChatThread({
               {msg.badge}
             </span>
           )}
-          <div className="chat-bubble">{msg.text}</div>
+          <div
+            className={`chat-bubble ${msg.role === 'assistant' ? 'md-bubble' : ''}`}
+          >
+            {msg.role === 'assistant' ? (
+              <MarkdownText>{msg.text}</MarkdownText>
+            ) : (
+              msg.text
+            )}
+          </div>
           {msg.checklist && (
             <ul className="chat-checklist">
               {msg.checklist.map((item) => (
