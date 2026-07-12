@@ -1,4 +1,6 @@
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, mapRecommendation, type ChatRecommendation } from './api';
+import { authHeaders } from './auth';
+import type { Product } from '../types/product';
 
 /**
  * Montir AI chat client.
@@ -36,7 +38,22 @@ export function resetSessionId(): void {
   }
 }
 
-export type ChatReply = { answer: string; questionsRemaining: number };
+export type ChatReply = {
+  answer: string;
+  questionsRemaining: number;
+  /** Listing cards suggested by the AI, ready for the product-card UI. */
+  recommendations: Product[];
+  /** Listings the AI is comparing side by side (2–3 items). */
+  comparisons: Product[];
+  /** Suggested follow-up questions to surface as tappable chips. */
+  followUps: string[];
+};
+
+/** Extra context sent with a chat message. */
+export type ChatContext = {
+  /** Public listing id (Product.id) of the product the user is viewing. */
+  listingId?: string;
+};
 
 export class ChatError extends Error {
   status: number;
@@ -57,7 +74,10 @@ const FRIENDLY: Record<number, string> = {
   504: 'Montir AI lama merespons. Coba lagi sebentar.',
 };
 
-export async function sendChat(message: string): Promise<ChatReply> {
+export async function sendChat(
+  message: string,
+  context?: ChatContext,
+): Promise<ChatReply> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
 
@@ -67,8 +87,16 @@ export async function sendChat(message: string): Promise<ChatReply> {
       headers: {
         'Content-Type': 'application/json',
         'X-Session-ID': getSessionId(),
+        // Send the Bearer token when logged in; authHeaders() is empty for
+        // guests, so guest chat stays unauthenticated as before.
+        ...authHeaders(),
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({
+        message,
+        // Sent when asking about a specific product so the AI can ground its
+        // answer on that listing.
+        ...(context?.listingId ? { listing_id: context.listingId } : {}),
+      }),
       signal: controller.signal,
     });
 
@@ -82,9 +110,23 @@ export async function sendChat(message: string): Promise<ChatReply> {
       );
     }
 
+    const data = json?.data ?? {};
+    const rawRecs: ChatRecommendation[] = Array.isArray(data.recommendations)
+      ? data.recommendations
+      : [];
+    const rawComparisons: ChatRecommendation[] = Array.isArray(data.comparisons)
+      ? data.comparisons
+      : [];
+    const followUps: string[] = Array.isArray(data.follow_up_questions)
+      ? data.follow_up_questions.filter((q: unknown): q is string => typeof q === 'string')
+      : [];
+
     return {
-      answer: String(json?.data?.answer ?? ''),
-      questionsRemaining: Number(json?.data?.questions_remaining ?? 0),
+      answer: String(data.answer ?? ''),
+      questionsRemaining: Number(data.questions_remaining ?? 0),
+      recommendations: rawRecs.map(mapRecommendation),
+      comparisons: rawComparisons.map(mapRecommendation),
+      followUps,
     };
   } catch (err) {
     if (err instanceof ChatError) throw err;

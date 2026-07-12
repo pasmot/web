@@ -43,6 +43,10 @@ function userFromPayload(payload: JwtPayload | null): AuthUser {
  */
 export function useAuth() {
   const [token, setToken] = useState<string | null>(null);
+  // False until the mount effect has restored (or rejected) any stored token.
+  // Gates must wait for this before deciding a user is logged out — otherwise
+  // the first render (token still null) looks like a guest.
+  const [ready, setReady] = useState(false);
 
   // On mount: capture the OAuth token from the redirect, else restore storage.
   // The backend returns it in the URL fragment (#token=, safer — never sent to
@@ -63,6 +67,7 @@ export function useAuth() {
         '',
         window.location.pathname + (qs ? `?${qs}` : ''),
       );
+      setReady(true);
       return;
     }
 
@@ -72,6 +77,7 @@ export function useAuth() {
     } else if (stored) {
       clearToken(); // expired / malformed
     }
+    setReady(true);
   }, []);
 
   const payload = token ? decodeJwt(token) : null;
@@ -98,5 +104,5 @@ export function useAuth() {
     setToken(null);
   }, []);
 
-  return { isLoggedIn, user, token, login, loginWithToken, logout };
+  return { isLoggedIn, ready, user, token, login, loginWithToken, logout };
 }

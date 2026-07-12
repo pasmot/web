@@ -17,6 +17,7 @@ import {
 import type { Product } from "../types/product";
 import { categoryMeta } from "../data/categories";
 import { useCategories } from "../hooks/useCategories";
+import { useFeaturedListings } from "../hooks/useFeaturedListings";
 import { dealers } from "../data/dealers";
 import { featuredProductIds, getProduct, products } from "../data/products";
 import { Button } from "../components/ui/Button";
@@ -78,10 +79,17 @@ export function LandingPage({
   onOpenInspeksi,
 }: LandingPageProps) {
   const { categories } = useCategories();
-  const featured = featuredProductIds
+
+  // "Unit pilihan minggu ini" comes from the live motor catalog; fall back to
+  // the static picks if the API returns nothing (so the section stays filled).
+  const { products: fetchedFeatured, loading: featuredLoading } =
+    useFeaturedListings(4);
+  const staticFeatured = featuredProductIds
     .map((id) => getProduct(id))
     .filter((p): p is Product => Boolean(p))
     .slice(0, 4);
+  const featured =
+    fetchedFeatured.length > 0 ? fetchedFeatured : staticFeatured;
 
   return (
     <>
@@ -222,6 +230,7 @@ export function LandingPage({
             savedIds={savedIds}
             onOpen={onOpenProduct}
             onToggleSave={onToggleSave}
+            loading={featuredLoading && featured.length === 0}
             layout="row"
           />
         </div>
@@ -446,7 +455,7 @@ export function LandingPage({
               <span>Rating kepuasan buyer</span>
             </div>
           </div>
-          <div className="dealer-strip">
+          {/* <div className="dealer-strip">
             {dealers.slice(0, 4).map((dealer) => (
               <button
                 key={dealer.id}
@@ -463,7 +472,7 @@ export function LandingPage({
                 </span>
               </button>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 

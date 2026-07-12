@@ -7,14 +7,18 @@ import { LandingBinding } from './LandingBinding';
 
 export function ProfileBinding() {
   const app = useApp();
-  const { isLoggedIn, requireLogin } = app;
+  const { isLoggedIn, authReady, requireLogin } = app;
 
   // Profil is a member feature — gate direct visits, show landing behind it.
+  // Wait for authReady so a logged-in user isn't flashed the gate/landing
+  // before the stored token restores.
   useEffect(() => {
-    if (!isLoggedIn) requireLogin({ kind: 'profile' });
-  }, [isLoggedIn, requireLogin]);
+    if (authReady && !isLoggedIn) requireLogin({ kind: 'profile' });
+  }, [authReady, isLoggedIn, requireLogin]);
 
-  if (!isLoggedIn) return <LandingBinding />;
+  // While the token is still restoring, render nothing rather than flashing
+  // the landing page or a guest-shaped profile.
+  if (!isLoggedIn) return authReady ? <LandingBinding /> : null;
 
   return (
     <ProfilePage

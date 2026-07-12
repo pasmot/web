@@ -29,6 +29,8 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [limitReached, setLimitReached] = useState(false);
+  // Follow-up chips from the latest reply; cleared while a new send is pending.
+  const [followUps, setFollowUps] = useState<string[]>([]);
 
   // Product id whose context has already been sent (the API remembers history,
   // so context is only prepended to the first message of a product chat).
@@ -49,6 +51,7 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
 
       setMessages((prev) => [...prev, { id: nextId('user'), role: 'user', text }]);
       setError(null);
+      setFollowUps([]);
       setIsTyping(true);
 
       // Fold product context into the first message of a product-advice chat.
@@ -64,13 +67,24 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
         apiMessage = `${parts.join(', ')}. ${text}`;
       }
 
-      sendChat(apiMessage)
-        .then(({ answer, questionsRemaining }) => {
+      // Ground the answer on the viewed product when in product-advice mode.
+      const listingId = mode === 'product-advice' && ctx ? ctx.id : undefined;
+
+      sendChat(apiMessage, { listingId })
+        .then(({ answer, questionsRemaining, recommendations, comparisons, followUps: replyFollowUps }) => {
           if (mode === 'product-advice' && ctx) contextSentRef.current = ctx.id;
           setMessages((prev) => [
             ...prev,
-            { id: nextId('assistant'), role: 'assistant', text: answer },
+            {
+              id: nextId('assistant'),
+              role: 'assistant',
+              text: answer,
+              products: recommendations.length ? recommendations : undefined,
+              comparisons: comparisons.length ? comparisons : undefined,
+              followUps: replyFollowUps.length ? replyFollowUps : undefined,
+            },
           ]);
+          setFollowUps(replyFollowUps);
           setUserMessageCount((c) => c + 1);
           setRemaining(questionsRemaining);
           if (questionsRemaining <= 0) setLimitReached(true);
@@ -113,6 +127,7 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
     setError(null);
     setLimitReached(false);
     setRemaining(null);
+    setFollowUps([]);
     setUserMessageCount(0);
     setMode('recommendation');
     setContextProduct(null);
@@ -129,6 +144,8 @@ export function useMontirChat({ isLoggedIn, onGateHit }: UseMontirChatArgs) {
     /** Questions left in the API session (null until the first reply). */
     remaining,
     limitReached,
+    /** Suggested follow-up questions from the latest reply (empty if none). */
+    followUps,
     error,
     sendMessage,
     openWithProduct,

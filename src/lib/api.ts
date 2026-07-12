@@ -156,6 +156,45 @@ export function mapListing(raw: ApiListing): Product {
   };
 }
 
+/** A recommendation card as returned inside a Montir AI chat response. */
+export type ChatRecommendation = {
+  listing_id: string;
+  title: string;
+  price: number;
+  price_text?: string | null;
+  condition?: string | null;
+  city?: string | null;
+  seller_name?: string | null;
+  category_id?: number | null;
+  image_url?: string | null;
+  /** Fallback key used elsewhere in the API for the same field. */
+  primary_image_url?: string | null;
+};
+
+/**
+ * Maps a chat recommendation into a Product so it renders with the shared card
+ * UI. Recommendations are lighter than catalog listings (often no image / no
+ * internal id) — missing fields degrade gracefully.
+ */
+export function mapRecommendation(rec: ChatRecommendation): Product {
+  const category = CATEGORY_BY_ID[rec.category_id ?? -1] ?? 'aksesoris';
+  const image = rec.image_url ?? rec.primary_image_url ?? '';
+  return {
+    id: rec.listing_id,
+    title: rec.title,
+    price: rec.price_text?.trim() || `Rp ${rec.price.toLocaleString('id-ID')}`,
+    priceValue: rec.price,
+    image,
+    gallery: image ? [image] : [],
+    tag: tagFor(category, rec.condition ?? ''),
+    category,
+    location: rec.city?.trim() || 'Indonesia',
+    year: '',
+    mileage: '',
+    seller: rec.seller_name?.trim() || 'PasarMotor',
+  };
+}
+
 function mapDetail(detail: ApiListingDetail): Product {
   const { listing, images, seller } = detail;
   const base = mapListing(listing);
@@ -361,4 +400,114 @@ export async function fetchMyBookmarks(init?: RequestInit): Promise<Product[]> {
     throw new Error('Unexpected bookmarks response');
   }
   return json.data.map(mapListing);
+}
+
+/* ---------- inspections ---------- */
+
+/** Raw inspection row from the API (create response + list rows). */
+type ApiInspection = {
+  id: number;
+  scheduled_date: string;
+  meeting_location: string;
+  notes: string | null;
+  fee_amount: number;
+  status: string;
+  created_at: string;
+  listing_id: number;
+  // Present on list rows (GET /me/inspections), absent on create response.
+  listing_public_id?: string | null;
+  title?: string | null;
+  price?: number | null;
+  price_text?: string | null;
+  city?: string | null;
+  province?: string | null;
+  primary_image_url?: string | null;
+};
+
+/** UI-friendly inspection request, with the joined listing summary. */
+export type Inspection = {
+  id: number;
+  scheduledDate: string;
+  meetingLocation: string;
+  notes: string | null;
+  feeAmount: number;
+  status: string;
+  createdAt: string;
+  /** Public listing id (UUID) for linking to the detail page; null if absent. */
+  listingPublicId: string | null;
+  title: string;
+  priceText: string;
+  location: string;
+  image: string;
+};
+
+function mapInspection(raw: ApiInspection): Inspection {
+  const priceText =
+    raw.price_text?.trim() ||
+    (raw.price != null ? `Rp ${raw.price.toLocaleString('id-ID')}` : '');
+  return {
+    id: raw.id,
+    scheduledDate: raw.scheduled_date,
+    meetingLocation: raw.meeting_location,
+    notes: raw.notes ?? null,
+    feeAmount: raw.fee_amount,
+    status: raw.status,
+    createdAt: raw.created_at,
+    listingPublicId: raw.listing_public_id ?? null,
+    title: raw.title?.trim() || 'Listing',
+    priceText,
+    location: locationOf(raw.city, raw.province),
+    image: raw.primary_image_url ?? '',
+  };
+}
+
+export type CreateInspectionPayload = {
+  /** yyyy-mm-dd — the native <input type="date"> value, sent verbatim. */
+  scheduled_date: string;
+  meeting_location: string;
+  notes?: string;
+};
+
+/**
+ * Creates an inspection request for a listing. Takes the internal integer id
+ * (Product.internalId), not the UUID listing_id. Returns the created row
+ * (carries the authoritative fee_amount / status).
+ */
+export async function createInspection(
+  internalId: number,
+  payload: CreateInspectionPayload,
+): Promise<Inspection> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/listings/${internalId}/inspections`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    const detail = json?.errors?.[0]?.detail as string | undefined;
+    throw new Error(detail ?? 'Gagal mengajukan inspeksi.');
+  }
+  return mapInspection(json.data as ApiInspection);
+}
+
+/** The user's inspection requests, newest first. Returns [] when unauthenticated. */
+export async function fetchMyInspections(
+  init?: RequestInit,
+): Promise<Inspection[]> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/me/inspections?page=1&limit=100`,
+    { ...init, headers: { ...authHeaders(), ...init?.headers } },
+  );
+  if (res.status === 401 || res.status === 403) return [];
+  if (!res.ok) throw new Error(`Inspections request failed (HTTP ${res.status})`);
+
+  const json: ApiEnvelope<ApiInspection[]> = await res.json();
+  if (!json.success || !Array.isArray(json.data)) {
+    throw new Error('Unexpected inspections response');
+  }
+  return json.data.map(mapInspection);
 }

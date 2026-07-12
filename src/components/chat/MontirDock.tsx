@@ -56,12 +56,15 @@ export function MontirDock({
 
   const suggestions =
     chat.mode === 'product-advice' ? productAdviceSuggestions : generalSuggestions;
+  // Prefer the AI's own follow-up questions; fall back to static suggestions.
   const chips =
-    chat.messages.length === 0
-      ? suggestions
-      : chat.mode === 'product-advice'
-        ? productAdviceSuggestions
-        : followUpSuggestions;
+    chat.followUps.length > 0
+      ? chat.followUps
+      : chat.messages.length === 0
+        ? suggestions
+        : chat.mode === 'product-advice'
+          ? productAdviceSuggestions
+          : followUpSuggestions;
 
   const showQuota = !isLoggedIn && chat.remainingFree <= 2;
   const isMini = !expanded && mode === 'mini';

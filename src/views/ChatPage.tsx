@@ -27,14 +27,17 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
     inputRef.current?.focus();
   };
 
+  // Prefer the AI's own follow-up questions; fall back to static suggestions.
   const chips =
-    chat.messages.length === 0
-      ? chat.mode === 'product-advice'
-        ? productAdviceSuggestions
-        : generalSuggestions
-      : chat.mode === 'product-advice'
-        ? productAdviceSuggestions
-        : followUpSuggestions;
+    chat.followUps.length > 0
+      ? chat.followUps
+      : chat.messages.length === 0
+        ? chat.mode === 'product-advice'
+          ? productAdviceSuggestions
+          : generalSuggestions
+        : chat.mode === 'product-advice'
+          ? productAdviceSuggestions
+          : followUpSuggestions;
 
   const showQuota = !isLoggedIn && chat.remainingFree <= 2;
 

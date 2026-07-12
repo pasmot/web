@@ -10,6 +10,10 @@ export type ChatMessage = {
   badge?: string;
   /** Product recommendation cards rendered inside the bubble */
   products?: Product[];
+  /** Listings compared side by side inside the bubble */
+  comparisons?: Product[];
+  /** Suggested follow-up questions from the AI for this reply */
+  followUps?: string[];
   /** Optional checklist rendered inside the bubble */
   checklist?: string[];
 };

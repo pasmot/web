@@ -91,6 +91,10 @@ export function Shell({ children }: { children: ReactNode }) {
         product={app.inspeksiFormProduct}
         onClose={app.closeInspeksiForm}
         onSubmit={app.submitInspeksi}
+        onBrowse={() => {
+          app.closeInspeksiForm();
+          app.exploreCatalog();
+        }}
       />
 
       <ContactSellerModal

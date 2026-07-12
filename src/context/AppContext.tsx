@@ -9,10 +9,17 @@ import {
   useState,
 } from 'react';
 import type { ReactNode } from 'react';
-import type { AppView, InspeksiRequest, PendingAction } from '../types/app';
+import type { AppView, PendingAction } from '../types/app';
 import type { Product } from '../types/product';
 import { getProduct } from '../data/products';
-import { fetchMyBookmarks, toggleBookmark } from '../lib/api';
+import {
+  createInspection,
+  fetchMyBookmarks,
+  fetchMyInspections,
+  toggleBookmark,
+  type CreateInspectionPayload,
+  type Inspection,
+} from '../lib/api';
 import { useAuth, type AuthUser } from '../hooks/useAuth';
 import { useMontirChat, type MontirChat } from '../hooks/useMontirChat';
 import { useRouter } from 'next/navigation';
@@ -23,6 +30,7 @@ const FEATURE_NAMES: Record<string, string> = {
   'saved-view': 'Incaran / Wishlist',
   profile: 'Profil & Akun',
   inspeksi: 'Jasa Inspeksi',
+  'inspeksi-view': 'Jasa Inspeksi',
   'contact-seller': 'Chat WhatsApp Penjual',
   'chat-continue': 'Chat Montir AI Lanjutan',
 };
@@ -30,10 +38,11 @@ const FEATURE_NAMES: Record<string, string> = {
 export type Toast = { id: number; text: string };
 
 let toastCounter = 0;
-let inspeksiCounter = 0;
 
 type AppContextValue = {
   isLoggedIn: boolean;
+  /** False until the stored token has been restored — gates must wait for it. */
+  authReady: boolean;
   user: AuthUser;
   /** Wishlist product ids (Product.id / UUID), derived from savedProducts. */
   savedIds: string[];
@@ -41,7 +50,10 @@ type AppContextValue = {
   savedProducts: Product[];
   /** True while the wishlist is being (re)loaded from the server. */
   savedLoading: boolean;
-  inspeksiRequests: InspeksiRequest[];
+  /** Server-backed inspection requests (GET /api/v1/me/inspections), newest first. */
+  inspeksiRequests: Inspection[];
+  /** True while inspection requests are being (re)loaded from the server. */
+  inspeksiLoading: boolean;
   chat: MontirChat;
 
   // dock
@@ -54,6 +66,8 @@ type AppContextValue = {
   navigate: (view: AppView) => void;
   smartNavigate: (view: AppView) => void;
   openProduct: (product: Product) => void;
+  /** Navigate to a listing detail by its public id (UUID). */
+  openListing: (publicId: string) => void;
   openDealer: (dealerId: string) => void;
   /** Navigate to the catalog, optionally pre-filtered by API category slug. */
   exploreCatalog: (categorySlug?: string, query?: string) => void;
@@ -83,12 +97,15 @@ type AppContextValue = {
   inspeksiFormOpen: boolean;
   inspeksiFormProduct: Product | null;
   closeInspeksiForm: () => void;
+  /**
+   * Submits the current inspeksiFormProduct to the API. Resolves with the
+   * authoritative fee; rejects with a user-facing message the form displays.
+   */
   submitInspeksi: (data: {
-    productId: string;
-    schedule: string;
-    location: string;
-    note: string;
-  }) => void;
+    scheduledDate: string;
+    meetingLocation: string;
+    notes: string;
+  }) => Promise<{ feeAmount: number }>;
 
   // contact seller modal
   contactProduct: Product | null;
@@ -109,11 +126,13 @@ export function useApp(): AppContextValue {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { isLoggedIn, user, login, loginWithToken, logout } = useAuth();
+  const { isLoggedIn, ready: authReady, user, login, loginWithToken, logout } =
+    useAuth();
 
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [savedLoading, setSavedLoading] = useState(false);
-  const [inspeksiRequests, setInspeksiRequests] = useState<InspeksiRequest[]>([]);
+  const [inspeksiRequests, setInspeksiRequests] = useState<Inspection[]>([]);
+  const [inspeksiLoading, setInspeksiLoading] = useState(false);
 
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [gateOpen, setGateOpen] = useState(false);
@@ -159,6 +178,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     refreshBookmarks().catch(() => {});
   }, [isLoggedIn, refreshBookmarks]);
+
+  /* ---------- Inspections (server-backed) ---------- */
+
+  const refreshInspections = useCallback(async (): Promise<Inspection[]> => {
+    setInspeksiLoading(true);
+    try {
+      const items = await fetchMyInspections();
+      setInspeksiRequests(items);
+      return items;
+    } finally {
+      setInspeksiLoading(false);
+    }
+  }, []);
+
+  // Load inspection requests when a session starts; drop them on logout.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setInspeksiRequests([]);
+      return;
+    }
+    refreshInspections().catch(() => {});
+  }, [isLoggedIn, refreshInspections]);
 
   // Optimistic toggle synced to POST /listings/{id}/bookmark. Static prototype
   // products carry no internalId and only toggle locally.
@@ -232,6 +273,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [router],
   );
 
+  const openListing = useCallback(
+    (publicId: string) => {
+      hasInternalHistory.current = true;
+      setDockExpandedState(false);
+      router.push(productPath(publicId));
+    },
+    [router],
+  );
+
   const openDealer = useCallback(
     (dealerId: string) => {
       hasInternalHistory.current = true;
@@ -289,10 +339,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         case 'saved-view':
           router.push(VIEW_PATHS.saved);
           break;
+        case 'inspeksi-view':
+          router.push(VIEW_PATHS.inspeksi);
+          break;
         case 'inspeksi': {
-          setInspeksiFormProduct(
-            action.productId ? (getProduct(action.productId) ?? null) : null,
-          );
+          setInspeksiFormProduct(action.product);
           setInspeksiFormOpen(true);
           break;
         }
@@ -383,7 +434,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const requestInspeksi = useCallback(
     (product: Product | null) => {
       if (!isLoggedIn) {
-        requireLogin({ kind: 'inspeksi', productId: product?.id ?? null });
+        requireLogin({ kind: 'inspeksi', product });
         return;
       }
       setInspeksiFormProduct(product);
@@ -442,19 +493,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   /* ---------- Inspeksi / logout ---------- */
 
   const submitInspeksi = useCallback(
-    (data: { productId: string; schedule: string; location: string; note: string }) => {
-      const request: InspeksiRequest = {
-        id: `inspeksi-${++inspeksiCounter}`,
-        productId: data.productId,
-        schedule: data.schedule,
-        location: data.location,
-        note: data.note,
-        status: 'menunggu',
-        createdAt: 'Hari ini',
+    async (data: {
+      scheduledDate: string;
+      meetingLocation: string;
+      notes: string;
+    }): Promise<{ feeAmount: number }> => {
+      const product = inspeksiFormProduct;
+      if (product?.internalId == null) {
+        throw new Error('Unit ini tidak bisa diinspeksi. Buka listing dari Pasar.');
+      }
+      const payload: CreateInspectionPayload = {
+        scheduled_date: data.scheduledDate,
+        meeting_location: data.meetingLocation.trim(),
+        notes: data.notes.trim() || undefined,
       };
-      setInspeksiRequests((prev) => [request, ...prev]);
+      const created = await createInspection(product.internalId, payload);
+      // Refresh so the list reflects the new request (fire-and-forget).
+      refreshInspections().catch(() => {});
+      return { feeAmount: created.feeAmount };
     },
-    [],
+    [inspeksiFormProduct, refreshInspections],
   );
 
   const handleLogout = useCallback(() => {
@@ -465,11 +523,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value: AppContextValue = {
     isLoggedIn,
+    authReady,
     user,
     savedIds: savedProducts.map((p) => p.id),
     savedProducts,
     savedLoading,
     inspeksiRequests,
+    inspeksiLoading,
     chat,
     dockExpanded,
     setDockExpanded,
@@ -477,6 +537,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     navigate,
     smartNavigate,
     openProduct,
+    openListing,
     openDealer,
     exploreCatalog,
     backToCatalog,

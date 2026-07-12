@@ -15,18 +15,7 @@ export type PendingAction =
   | { kind: 'wishlist'; product: Product }
   | { kind: 'profile' }
   | { kind: 'saved-view' }
-  | { kind: 'inspeksi'; productId: string | null }
+  | { kind: 'inspeksi-view' }
+  | { kind: 'inspeksi'; product: Product | null }
   | { kind: 'contact-seller'; productId: string }
   | { kind: 'chat-continue'; message: string };
-
-export type InspeksiStatus = 'menunggu' | 'dijadwalkan' | 'selesai' | 'dibatalkan';
-
-export type InspeksiRequest = {
-  id: string;
-  productId: string;
-  schedule: string;
-  location: string;
-  note: string;
-  status: InspeksiStatus;
-  createdAt: string;
-};

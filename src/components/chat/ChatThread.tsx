@@ -6,6 +6,7 @@ import { CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 import type { ChatMessage } from '../../types/chat';
 import type { Product } from '../../types/product';
 import { montirIntro } from '../../data/chatMocks';
+import { ProductImage } from '../ui/ProductImage';
 
 // Lazily loaded so react-markdown is fetched only when an AI answer renders —
 // keeps it out of the app-wide bundle (MontirDock ships in every page's shell).
@@ -70,25 +71,54 @@ export function ChatThread({
               ))}
             </ul>
           )}
-          {msg.products && msg.products.length > 0 && (
-            <div className="chat-products">
-              {msg.products.map((product) => (
+          {msg.comparisons && msg.comparisons.length > 0 && (
+            <div className="chat-compare">
+              {msg.comparisons.map((product) => (
                 <button
                   key={product.id}
-                  className="chat-product-card"
+                  className="chat-compare-card"
                   onClick={() => onOpenProduct(product)}
                 >
-                  <img src={product.image} alt={product.title} />
-                  <span className="chat-product-card-info">
+                  <ProductImage
+                    src={product.image}
+                    alt={product.title}
+                    className="chat-compare-media"
+                    compact
+                  />
+                  <span className="chat-compare-info">
                     <strong>{product.title}</strong>
                     <span className="price">{product.price}</span>
-                    <small>
-                      {product.location} · {product.year} · {product.mileage}
-                    </small>
+                    <small>{product.tag}</small>
+                    {product.location && (
+                      <small className="muted">{product.location}</small>
+                    )}
                   </span>
-                  <ChevronRight size={17} />
                 </button>
               ))}
+            </div>
+          )}
+          {msg.products && msg.products.length > 0 && (
+            <div className="chat-products">
+              {msg.products.map((product) => {
+                const meta = [product.location, product.year, product.mileage]
+                  .filter(Boolean)
+                  .join(' · ');
+                return (
+                  <button
+                    key={product.id}
+                    className="chat-product-card"
+                    onClick={() => onOpenProduct(product)}
+                  >
+                    <ProductImage src={product.image} alt={product.title} compact />
+                    <span className="chat-product-card-info">
+                      <strong>{product.title}</strong>
+                      <span className="price">{product.price}</span>
+                      {meta && <small>{meta}</small>}
+                    </span>
+                    <ChevronRight size={17} />
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

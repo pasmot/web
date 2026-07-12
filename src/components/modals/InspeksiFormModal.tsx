@@ -1,49 +1,56 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, PackageSearch } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { products } from '../../data/products';
+import { ProductImage } from '../ui/ProductImage';
+import { INSPEKSI_FEE, formatRupiah } from '../../data/inspeksi';
 import type { Product } from '../../types/product';
 
 type InspeksiFormModalProps = {
   open: boolean;
   product: Product | null;
   onClose: () => void;
+  /** Submits to the API; resolves with the authoritative fee or rejects. */
   onSubmit: (data: {
-    productId: string;
-    schedule: string;
-    location: string;
-    note: string;
-  }) => void;
+    scheduledDate: string;
+    meetingLocation: string;
+    notes: string;
+  }) => Promise<{ feeAmount: number }>;
+  /** Sends the user to browse listings when no inspectable unit is set. */
+  onBrowse: () => void;
 };
-
-const motorOptions = products.filter((p) => p.category === 'motor');
 
 export function InspeksiFormModal({
   open,
   product,
   onClose,
   onSubmit,
+  onBrowse,
 }: InspeksiFormModalProps) {
-  const [productId, setProductId] = useState(product?.id ?? motorOptions[0].id);
   const [schedule, setSchedule] = useState('');
   const [location, setLocation] = useState('');
   const [note, setNote] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Fee from the successful response — presence flags the success screen.
+  const [successFee, setSuccessFee] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
-      setProductId(product?.id ?? motorOptions[0].id);
-      setSubmitted(false);
       setSchedule('');
       setLocation('');
       setNote('');
+      setSubmitting(false);
+      setError(null);
+      setSuccessFee(null);
     }
   }, [open, product]);
 
-  const selected = motorOptions.find((p) => p.id === productId) ?? motorOptions[0];
+  // Inspection targets a real listing (needs its internal id). Static/mock
+  // products (and the generic "Ajukan Inspeksi" entry) have none.
+  const canInspect = product?.internalId != null;
 
-  if (submitted) {
+  if (successFee != null) {
     return (
       <Modal open={open} onClose={onClose} maxWidth={400}>
         <div className="modal-success">
@@ -52,8 +59,10 @@ export function InspeksiFormModal({
           </div>
           <h2>Inspeksi berhasil diajukan</h2>
           <p>
-            Permintaan inspeksi untuk <strong>{selected.title}</strong> sudah masuk
-            dengan status <strong>menunggu</strong>. Montir kami akan menghubungimu.
+            Permintaan inspeksi untuk <strong>{product?.title}</strong> sudah masuk
+            dengan status <strong>menunggu</strong> · biaya{' '}
+            <strong>{formatRupiah(successFee)}</strong>. Montir kami akan
+            menghubungimu.
           </p>
           <div className="modal-actions" style={{ marginTop: 20 }}>
             <Button variant="dark" block onClick={onClose}>
@@ -65,16 +74,57 @@ export function InspeksiFormModal({
     );
   }
 
+  // No inspectable unit — guide the user to pick a listing from the catalog.
+  if (!canInspect) {
+    return (
+      <Modal open={open} onClose={onClose} maxWidth={400}>
+        <div className="modal-success">
+          <div className="modal-success-icon" style={{ background: 'var(--color-surface-soft)' }}>
+            <PackageSearch size={28} />
+          </div>
+          <h2>Pilih unit dulu</h2>
+          <p>
+            Inspeksi diajukan untuk satu listing tertentu. Buka listing yang kamu
+            minati di Pasar, lalu tekan <strong>Ajukan Inspeksi</strong> di halaman
+            produknya.
+          </p>
+          <div className="modal-actions" style={{ marginTop: 20 }}>
+            <Button variant="dark" block onClick={onBrowse}>
+              Telusuri Pasar
+            </Button>
+            <Button variant="ghost" block onClick={onClose}>
+              Batal
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { feeAmount } = await onSubmit({
+        scheduledDate: schedule,
+        meetingLocation: location,
+        notes: note,
+      });
+      setSuccessFee(feeAmount);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Gagal mengajukan inspeksi.',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Modal open={open} onClose={onClose} maxWidth={440}>
-      <form
-        className="form-modal"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit({ productId, schedule, location, note });
-          setSubmitted(true);
-        }}
-      >
+      <form className="form-modal" onSubmit={handleSubmit}>
         <h2>Ajukan Inspeksi Montir</h2>
         <p>
           Montir akan cek mesin, rangka, CVT, kelistrikan, dokumen, dan estimasi biaya
@@ -82,28 +132,15 @@ export function InspeksiFormModal({
         </p>
 
         <div className="form-product-pill">
-          <img src={selected.image} alt="" />
+          <ProductImage src={product.image} alt="" compact />
           <div>
-            <strong>{selected.title}</strong>
+            <strong>{product.title}</strong>
             <small>
-              {selected.location} · {selected.year} · {selected.mileage}
+              {[product.location, product.year, product.mileage]
+                .filter(Boolean)
+                .join(' · ')}
             </small>
           </div>
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="inspeksi-unit">Unit yang diinspeksi</label>
-          <select
-            id="inspeksi-unit"
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-          >
-            {motorOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title} — {p.location}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="form-field">
@@ -139,11 +176,25 @@ export function InspeksiFormModal({
           />
         </div>
 
+        {error && (
+          <div className="chat-error" style={{ marginTop: 4 }}>
+            <AlertCircle size={13} />
+            {error}
+          </div>
+        )}
+
         <div className="modal-actions">
-          <Button type="submit" block>
-            Ajukan Inspeksi · Rp. 299.000
+          <Button type="submit" block disabled={submitting}>
+            {submitting ? (
+              <>
+                <Loader2 size={16} className="spin" />
+                Mengajukan…
+              </>
+            ) : (
+              `Ajukan Inspeksi · ${formatRupiah(INSPEKSI_FEE)}`
+            )}
           </Button>
-          <Button type="button" variant="ghost" block onClick={onClose}>
+          <Button type="button" variant="ghost" block onClick={onClose} disabled={submitting}>
             Batal
           </Button>
         </div>

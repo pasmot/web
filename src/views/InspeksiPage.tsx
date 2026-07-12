@@ -1,39 +1,55 @@
 import { useState } from 'react';
 import { Plus, Wrench } from 'lucide-react';
-import type { InspeksiRequest, InspeksiStatus } from '../types/app';
-import { getProduct } from '../data/products';
+import type { Inspection } from '../lib/api';
+import { formatRupiah } from '../data/inspeksi';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
+import { ProductImage } from '../components/ui/ProductImage';
 
 type InspeksiPageProps = {
-  requests: InspeksiRequest[];
+  requests: Inspection[];
+  loading: boolean;
   onNewRequest: () => void;
+  onOpenListing: (publicId: string) => void;
 };
 
-const STATUS_TONE: Record<InspeksiStatus, 'warning' | 'info' | 'success' | 'neutral'> = {
-  menunggu: 'warning',
-  dijadwalkan: 'info',
-  selesai: 'success',
-  dibatalkan: 'neutral',
+type Tone = 'warning' | 'info' | 'success' | 'neutral';
+
+// API status is 'pending' for now; map the known ones and tolerate the rest.
+const STATUS_META: Record<string, { tone: Tone; label: string }> = {
+  pending: { tone: 'warning', label: 'Menunggu' },
+  scheduled: { tone: 'info', label: 'Dijadwalkan' },
+  completed: { tone: 'success', label: 'Selesai' },
+  cancelled: { tone: 'neutral', label: 'Dibatalkan' },
 };
 
-const STATUS_LABEL: Record<InspeksiStatus, string> = {
-  menunggu: 'Menunggu',
-  dijadwalkan: 'Dijadwalkan',
-  selesai: 'Selesai',
-  dibatalkan: 'Dibatalkan',
-};
+const statusMeta = (status: string): { tone: Tone; label: string } =>
+  STATUS_META[status] ?? { tone: 'neutral', label: status };
 
-export function InspeksiPage({ requests, onNewRequest }: InspeksiPageProps) {
+const ACTIVE_STATUSES = new Set(['pending', 'scheduled']);
+
+/** Format an ISO/date string as a readable id-ID date; fall back to raw. */
+function formatDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+export function InspeksiPage({
+  requests,
+  loading,
+  onNewRequest,
+  onOpenListing,
+}: InspeksiPageProps) {
   const [tab, setTab] = useState<'aktif' | 'riwayat'>('aktif');
 
-  const active = requests.filter(
-    (r) => r.status === 'menunggu' || r.status === 'dijadwalkan',
-  );
-  const history = requests.filter(
-    (r) => r.status === 'selesai' || r.status === 'dibatalkan',
-  );
+  const active = requests.filter((r) => ACTIVE_STATUSES.has(r.status));
+  const history = requests.filter((r) => !ACTIVE_STATUSES.has(r.status));
   const list = tab === 'aktif' ? active : history;
 
   return (
@@ -77,7 +93,20 @@ export function InspeksiPage({ requests, onNewRequest }: InspeksiPageProps) {
           </button>
         </div>
 
-        {list.length === 0 ? (
+        {loading ? (
+          <div className="inspeksi-list">
+            {Array.from({ length: 2 }, (_, i) => (
+              <div className="inspeksi-card" key={i}>
+                <div className="skeleton" style={{ width: 64, height: 64, borderRadius: 12 }} />
+                <div className="inspeksi-card-info" style={{ flex: 1 }}>
+                  <div className="skeleton" style={{ height: 15, width: '60%' }} />
+                  <div className="skeleton" style={{ height: 12, width: '80%', marginTop: 8 }} />
+                  <div className="skeleton" style={{ height: 12, width: '40%', marginTop: 6 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : list.length === 0 ? (
           <EmptyState
             icon={<Wrench size={26} />}
             title={tab === 'aktif' ? 'Belum ada inspeksi aktif' : 'Belum ada riwayat'}
@@ -95,21 +124,30 @@ export function InspeksiPage({ requests, onNewRequest }: InspeksiPageProps) {
         ) : (
           <div className="inspeksi-list">
             {list.map((req) => {
-              const product = getProduct(req.productId);
-              if (!product) return null;
+              const { tone, label } = statusMeta(req.status);
+              const clickable = Boolean(req.listingPublicId);
               return (
-                <div className="inspeksi-card" key={req.id}>
-                  <img src={product.image} alt="" />
+                <div
+                  className="inspeksi-card"
+                  key={req.id}
+                  onClick={
+                    clickable
+                      ? () => onOpenListing(req.listingPublicId as string)
+                      : undefined
+                  }
+                  role={clickable ? 'button' : undefined}
+                  tabIndex={clickable ? 0 : undefined}
+                  style={clickable ? { cursor: 'pointer' } : undefined}
+                >
+                  <ProductImage src={req.image} alt="" compact />
                   <div className="inspeksi-card-info">
-                    <strong>{product.title}</strong>
+                    <strong>{req.title}</strong>
                     <small>
-                      {req.schedule} · {req.location}
+                      {formatDate(req.scheduledDate)} · {req.meetingLocation}
                     </small>
-                    <small>Montir: PasarMotor · Rp. 299.000</small>
+                    <small>Montir: PasarMotor · {formatRupiah(req.feeAmount)}</small>
                   </div>
-                  <Badge tone={STATUS_TONE[req.status]}>
-                    {STATUS_LABEL[req.status]}
-                  </Badge>
+                  <Badge tone={tone}>{label}</Badge>
                 </div>
               );
             })}

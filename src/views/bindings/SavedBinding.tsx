@@ -6,18 +6,20 @@ import { SavedPage } from '../SavedPage';
 
 export function SavedBinding() {
   const app = useApp();
-  const { isLoggedIn, requireLogin } = app;
+  const { isLoggedIn, authReady, requireLogin } = app;
 
-  // Incaran is a member feature — gate direct visits.
+  // Incaran is a member feature — gate direct visits. Wait for authReady so a
+  // logged-in user isn't briefly treated as a guest before the token restores.
   useEffect(() => {
-    if (!isLoggedIn) requireLogin({ kind: 'saved-view' });
-  }, [isLoggedIn, requireLogin]);
+    if (authReady && !isLoggedIn) requireLogin({ kind: 'saved-view' });
+  }, [authReady, isLoggedIn, requireLogin]);
 
   return (
     <SavedPage
       products={isLoggedIn ? app.savedProducts : []}
       savedIds={isLoggedIn ? app.savedIds : []}
-      loading={app.savedLoading}
+      // Show the skeleton (not the empty state) until auth + wishlist resolve.
+      loading={!authReady || app.savedLoading}
       onOpenProduct={app.openProduct}
       onToggleSave={app.toggleSave}
       onExploreCatalog={() => app.exploreCatalog()}
