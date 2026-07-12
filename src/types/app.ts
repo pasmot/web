@@ -8,9 +8,11 @@ export type AppView =
   | 'profile'
   | 'inspeksi';
 
+import type { Product } from './product';
+
 export type PendingAction =
   | null
-  | { kind: 'wishlist'; productId: string }
+  | { kind: 'wishlist'; product: Product }
   | { kind: 'profile' }
   | { kind: 'saved-view' }
   | { kind: 'inspeksi'; productId: string | null }

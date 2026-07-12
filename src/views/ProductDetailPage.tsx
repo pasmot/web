@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import type { Product } from '../types/product';
 import { getDealer } from '../data/dealers';
-import { fetchCatalog } from '../lib/api';
+import { categorySlug, fetchCatalog } from '../lib/api';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { ProductImage } from '../components/ui/ProductImage';
@@ -52,7 +52,7 @@ export function ProductDetailPage({
   // Live "produk serupa" from the same category.
   useEffect(() => {
     let active = true;
-    fetchCatalog({ category: product.category, limit: 8 })
+    fetchCatalog({ categorySlug: categorySlug(product.category), limit: 8 })
       .then(({ items }) => {
         if (active) {
           setSimilar(items.filter((p) => p.id !== product.id).slice(0, 4));

@@ -42,10 +42,10 @@ export type ApiListing = {
   id: number;
   listing_id: string;
   seller_id: number;
-  category_id: number;
+  category_id: number | null;
   title: string;
   price: number;
-  price_text: string;
+  price_text: string | null;
   condition: string;
   city: string;
   province: string;
@@ -73,14 +73,36 @@ type ApiListingDetail = {
   } | null;
 };
 
-/* ---------- category mapping (API id ↔ app category ↔ slug) ---------- */
+/* ---------- categories ---------- */
 
+export type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+/** Categories from /api/v1/categories — the source of truth for filtering. */
+export async function fetchCategories(init?: RequestInit): Promise<Category[]> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/categories`, withOrigin(init));
+  if (!res.ok) throw new Error(`Categories request failed (HTTP ${res.status})`);
+
+  const json: ApiEnvelope<Category[]> = await res.json();
+  if (!json.success || !Array.isArray(json.data)) {
+    throw new Error('Unexpected categories response');
+  }
+  return [...json.data].sort((a, b) => a.id - b.id);
+}
+
+// Display grouping only (tag/label on cards). The filter itself uses the
+// category slug straight from the API, so new categories don't break it.
 const CATEGORY_BY_ID: Record<number, ProductCategory> = {
   1: 'motor',
   2: 'sparepart',
   3: 'aksesoris',
 };
 
+// Slug lookup for app-internal display categories (e.g. "produk serupa" on the
+// detail page). User-facing filtering uses slugs from fetchCategories directly.
 const SLUG_BY_CATEGORY: Record<ProductCategory, string> = {
   motor: 'motor',
   sparepart: 'spare-part-motor',
@@ -113,12 +135,13 @@ function locationOf(
 /* ---------- mappers (API → app Product) ---------- */
 
 export function mapListing(raw: ApiListing): Product {
-  const category = CATEGORY_BY_ID[raw.category_id] ?? 'aksesoris';
+  const category = CATEGORY_BY_ID[raw.category_id ?? -1] ?? 'aksesoris';
   const image = raw.primary_image_url ?? '';
   return {
     id: raw.listing_id,
+    internalId: raw.id,
     title: raw.title,
-    price: raw.price_text,
+    price: raw.price_text?.trim() || `Rp ${raw.price.toLocaleString('id-ID')}`,
     priceValue: raw.price,
     image,
     gallery: image ? [image] : [],
@@ -166,7 +189,10 @@ function mapDetail(detail: ApiListingDetail): Product {
 
 export type CatalogQuery = {
   q?: string;
-  category?: ProductCategory | null;
+  /** Category slug as returned by /api/v1/categories. */
+  categorySlug?: string | null;
+  /** Listing condition as stored by the API: 'baru' | 'bekas'. */
+  condition?: string | null;
   city?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -191,7 +217,8 @@ export async function fetchCatalog(
 ): Promise<CatalogResult> {
   const sp = new URLSearchParams();
   if (params.q?.trim()) sp.set('q', params.q.trim());
-  if (params.category) sp.set('category_slug', categorySlug(params.category));
+  if (params.categorySlug) sp.set('category_slug', params.categorySlug);
+  if (params.condition) sp.set('condition', params.condition);
   if (params.city?.trim()) sp.set('city', params.city.trim());
   if (params.minPrice != null) sp.set('min_price', String(params.minPrice));
   if (params.maxPrice != null) sp.set('max_price', String(params.maxPrice));
@@ -284,4 +311,54 @@ export async function updateMe(body: {
 
   const json: ApiEnvelope<MeProfile> = await res.json();
   return json.data;
+}
+
+/* ---------- bookmarks (wishlist) ---------- */
+
+export type BookmarkToggleResult = {
+  /** Bookmark state AFTER the toggle. */
+  bookmarked: boolean;
+  saves_count: number;
+};
+
+/**
+ * Toggles a bookmark on a listing. Takes the internal integer id
+ * (Product.internalId), not the UUID listing_id.
+ */
+export async function toggleBookmark(
+  internalId: number,
+): Promise<BookmarkToggleResult> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/listings/${internalId}/bookmark`,
+    { method: 'POST', headers: authHeaders() },
+  );
+  if (!res.ok) throw new Error(`Bookmark request failed (HTTP ${res.status})`);
+
+  const json: ApiEnvelope<BookmarkToggleResult> = await res.json();
+  if (!json.success) throw new Error('Unexpected bookmark response');
+  return json.data;
+}
+
+type ApiBookmark = ApiListing & {
+  bookmark_id: number;
+  bookmarked_at: string;
+};
+
+/**
+ * The user's wishlist, newest first. Returns [] when unauthenticated.
+ * Fetches up to the API's max page size — enough for a personal wishlist.
+ */
+export async function fetchMyBookmarks(init?: RequestInit): Promise<Product[]> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/me/bookmarks?page=1&limit=100`, {
+    ...init,
+    headers: { ...authHeaders(), ...init?.headers },
+  });
+  if (res.status === 401 || res.status === 403) return [];
+  if (!res.ok) throw new Error(`Bookmarks request failed (HTTP ${res.status})`);
+
+  const json: ApiEnvelope<ApiBookmark[]> = await res.json();
+  if (!json.success || !Array.isArray(json.data)) {
+    throw new Error('Unexpected bookmarks response');
+  }
+  return json.data.map(mapListing);
 }

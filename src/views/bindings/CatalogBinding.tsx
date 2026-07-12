@@ -1,11 +1,11 @@
 'use client';
 
-import type { ProductCategory } from '../../types/product';
 import { useApp } from '../../context/AppContext';
 import { CatalogPage } from '../CatalogPage';
 
 type CatalogBindingProps = {
-  initialCategory: ProductCategory | null;
+  /** Category slug from /api/v1/categories, or null for all. */
+  initialCategory: string | null;
   initialQuery: string;
 };
 

@@ -1,34 +1,63 @@
+import type { Category } from '../../lib/api';
 import { filterOptions } from '../../data/categories';
 
+/**
+ * All filters map to API query params — every change triggers a new request
+ * (no client-side filtering). `kategori` holds a category slug or 'semua'.
+ */
 export type CatalogFilters = {
-  jenis: string;
+  kategori: string;
+  kondisi: string;
   harga: string;
   tahun: string;
   lokasi: string;
 };
 
 export const DEFAULT_FILTERS: CatalogFilters = {
-  jenis: 'Semua',
+  kategori: 'semua',
+  kondisi: 'Semua',
   harga: 'Semua',
   tahun: 'Semua',
   lokasi: 'Semua',
 };
 
-const GROUPS: { key: keyof CatalogFilters; label: string }[] = [
-  { key: 'jenis', label: 'Jenis' },
-  { key: 'harga', label: 'Harga' },
-  { key: 'tahun', label: 'Tahun' },
-  { key: 'lokasi', label: 'Lokasi' },
-];
+type Option = { value: string; label: string };
+
+const toOptions = (values: readonly string[]): Option[] =>
+  values.map((v) => ({ value: v, label: v }));
 
 type FilterPanelProps = {
+  /** Categories from /api/v1/categories — drives the "Kategori" group. */
+  categories: Category[];
   filters: CatalogFilters;
   onChange: (filters: CatalogFilters) => void;
   sheetOpen?: boolean;
 };
 
-export function FilterPanel({ filters, onChange, sheetOpen = false }: FilterPanelProps) {
-  const isDirty = GROUPS.some(({ key }) => filters[key] !== 'Semua');
+export function FilterPanel({
+  categories,
+  filters,
+  onChange,
+  sheetOpen = false,
+}: FilterPanelProps) {
+  const groups: { key: keyof CatalogFilters; label: string; options: Option[] }[] = [
+    {
+      key: 'kategori',
+      label: 'Kategori',
+      options: [
+        { value: 'semua', label: 'Semua' },
+        ...categories.map((c) => ({ value: c.slug, label: c.name })),
+      ],
+    },
+    { key: 'kondisi', label: 'Kondisi', options: toOptions(filterOptions.kondisi) },
+    { key: 'harga', label: 'Harga', options: toOptions(filterOptions.harga) },
+    { key: 'tahun', label: 'Tahun', options: toOptions(filterOptions.tahun) },
+    { key: 'lokasi', label: 'Lokasi', options: toOptions(filterOptions.lokasi) },
+  ];
+
+  const isDirty = groups.some(
+    ({ key }) => filters[key] !== DEFAULT_FILTERS[key],
+  );
 
   return (
     <aside className={`filter-panel ${sheetOpen ? 'sheet-open' : ''}`}>
@@ -43,17 +72,17 @@ export function FilterPanel({ filters, onChange, sheetOpen = false }: FilterPane
         </button>
       </div>
 
-      {GROUPS.map(({ key, label }) => (
+      {groups.map(({ key, label, options }) => (
         <div className="filter-group" key={key}>
           <h4>{label}</h4>
           <div className="filter-chips">
-            {filterOptions[key].map((option) => (
+            {options.map((option) => (
               <button
-                key={option}
-                className={`filter-chip ${filters[key] === option ? 'active' : ''}`}
-                onClick={() => onChange({ ...filters, [key]: option })}
+                key={option.value}
+                className={`filter-chip ${filters[key] === option.value ? 'active' : ''}`}
+                onClick={() => onChange({ ...filters, [key]: option.value })}
               >
-                {option}
+                {option.label}
               </button>
             ))}
           </div>
@@ -61,6 +90,18 @@ export function FilterPanel({ filters, onChange, sheetOpen = false }: FilterPane
       ))}
     </aside>
   );
+}
+
+/** Maps the "Kondisi" chip to the API condition param. */
+export function conditionFor(kondisi: string): string | undefined {
+  switch (kondisi) {
+    case 'Baru':
+      return 'baru';
+    case 'Bekas':
+      return 'bekas';
+    default:
+      return undefined;
+  }
 }
 
 /** Maps the "Harga" chip to API price bounds (in rupiah). */
@@ -99,43 +140,4 @@ export function yearRangeFor(tahun: string): {
     default:
       return {};
   }
-}
-
-export function applyFilters<
-  T extends {
-    tag: string;
-    priceValue: number;
-    year: string;
-    location: string;
-  },
->(items: T[], filters: CatalogFilters): T[] {
-  return items.filter((item) => {
-    if (filters.jenis !== 'Semua' && item.tag !== filters.jenis) return false;
-
-    if (filters.harga !== 'Semua') {
-      const juta = item.priceValue / 1_000_000;
-      if (filters.harga === '< 10 Juta' && juta >= 10) return false;
-      if (filters.harga === '10–25 Juta' && (juta < 10 || juta > 25)) return false;
-      if (filters.harga === '25–40 Juta' && (juta < 25 || juta > 40)) return false;
-      if (filters.harga === '> 40 Juta' && juta <= 40) return false;
-    }
-
-    if (filters.tahun !== 'Semua') {
-      const year = parseInt(item.year, 10);
-      if (Number.isNaN(year)) return false;
-      if (filters.tahun === '2024–2025' && (year < 2024 || year > 2025)) return false;
-      if (filters.tahun === '2021–2023' && (year < 2021 || year > 2023)) return false;
-      if (filters.tahun === '2018–2020' && (year < 2018 || year > 2020)) return false;
-      if (filters.tahun === '< 2018' && year >= 2018) return false;
-    }
-
-    if (
-      filters.lokasi !== 'Semua' &&
-      !item.location.toLowerCase().includes(filters.lokasi.toLowerCase())
-    ) {
-      return false;
-    }
-
-    return true;
-  });
 }

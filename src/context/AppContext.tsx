@@ -10,8 +10,9 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import type { AppView, InspeksiRequest, PendingAction } from '../types/app';
-import type { Product, ProductCategory } from '../types/product';
+import type { Product } from '../types/product';
 import { getProduct } from '../data/products';
+import { fetchMyBookmarks, toggleBookmark } from '../lib/api';
 import { useAuth, type AuthUser } from '../hooks/useAuth';
 import { useMontirChat, type MontirChat } from '../hooks/useMontirChat';
 import { useRouter } from 'next/navigation';
@@ -34,7 +35,12 @@ let inspeksiCounter = 0;
 type AppContextValue = {
   isLoggedIn: boolean;
   user: AuthUser;
+  /** Wishlist product ids (Product.id / UUID), derived from savedProducts. */
   savedIds: string[];
+  /** Server-backed wishlist (GET /api/v1/me/bookmarks), newest first. */
+  savedProducts: Product[];
+  /** True while the wishlist is being (re)loaded from the server. */
+  savedLoading: boolean;
   inspeksiRequests: InspeksiRequest[];
   chat: MontirChat;
 
@@ -49,7 +55,8 @@ type AppContextValue = {
   smartNavigate: (view: AppView) => void;
   openProduct: (product: Product) => void;
   openDealer: (dealerId: string) => void;
-  exploreCatalog: (category?: ProductCategory, query?: string) => void;
+  /** Navigate to the catalog, optionally pre-filtered by API category slug. */
+  exploreCatalog: (categorySlug?: string, query?: string) => void;
   /** Go back to the catalog, preserving its scroll/filters via history. */
   backToCatalog: () => void;
   openFullChat: () => void;
@@ -104,7 +111,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { isLoggedIn, user, login, loginWithToken, logout } = useAuth();
 
-  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [savedProducts, setSavedProducts] = useState<Product[]>([]);
+  const [savedLoading, setSavedLoading] = useState(false);
   const [inspeksiRequests, setInspeksiRequests] = useState<InspeksiRequest[]>([]);
 
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
@@ -125,6 +133,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 2600);
   }, []);
+
+  /* ---------- Bookmarks (server-backed wishlist) ---------- */
+
+  // Mirror for callbacks that need the current list without re-binding.
+  const savedRef = useRef<Product[]>([]);
+  savedRef.current = savedProducts;
+
+  const refreshBookmarks = useCallback(async (): Promise<Product[]> => {
+    setSavedLoading(true);
+    try {
+      const items = await fetchMyBookmarks();
+      setSavedProducts(items);
+      return items;
+    } finally {
+      setSavedLoading(false);
+    }
+  }, []);
+
+  // Load the wishlist when a session starts; drop it on logout.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setSavedProducts([]);
+      return;
+    }
+    refreshBookmarks().catch(() => {});
+  }, [isLoggedIn, refreshBookmarks]);
+
+  // Optimistic toggle synced to POST /listings/{id}/bookmark. Static prototype
+  // products carry no internalId and only toggle locally.
+  const performToggleSave = useCallback(
+    (product: Product) => {
+      const wasSaved = savedRef.current.some((p) => p.id === product.id);
+      setSavedProducts((prev) =>
+        wasSaved
+          ? prev.filter((p) => p.id !== product.id)
+          : [product, ...prev],
+      );
+      pushToast(wasSaved ? 'Dihapus dari Incaran' : 'Tersimpan ke Incaran');
+
+      if (product.internalId == null) return;
+
+      toggleBookmark(product.internalId)
+        .then((result) => {
+          // The server is the source of truth — reconcile if a race flipped it.
+          setSavedProducts((prev) => {
+            const has = prev.some((p) => p.id === product.id);
+            if (result.bookmarked && !has) return [product, ...prev];
+            if (!result.bookmarked && has) {
+              return prev.filter((p) => p.id !== product.id);
+            }
+            return prev;
+          });
+        })
+        .catch(() => {
+          // Roll back the optimistic flip.
+          setSavedProducts((prev) =>
+            wasSaved
+              ? [product, ...prev]
+              : prev.filter((p) => p.id !== product.id),
+          );
+          pushToast('Gagal menyimpan ke Incaran — coba lagi.');
+        });
+    },
+    [pushToast],
+  );
 
   /* ---------- Chat (shared between dock & full view) ---------- */
 
@@ -168,9 +241,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const exploreCatalog = useCallback(
-    (category?: ProductCategory, query?: string) => {
+    (categorySlug?: string, query?: string) => {
       hasInternalHistory.current = true;
-      router.push(catalogPath(category ?? null, query));
+      router.push(catalogPath(categorySlug ?? null, query));
     },
     [router],
   );
@@ -196,10 +269,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (action: NonNullable<PendingAction>) => {
       switch (action.kind) {
         case 'wishlist': {
-          setSavedIds((prev) =>
-            prev.includes(action.productId) ? prev : [...prev, action.productId],
-          );
-          pushToast('Tersimpan ke Incaran');
+          const { product } = action;
+          // Sync with the server first — the listing may already be bookmarked
+          // from a previous session, and a blind toggle would remove it.
+          refreshBookmarks()
+            .then((items) => {
+              if (items.some((p) => p.id === product.id)) {
+                pushToast('Sudah ada di Incaran');
+              } else {
+                performToggleSave(product);
+              }
+            })
+            .catch(() => performToggleSave(product));
           break;
         }
         case 'profile':
@@ -225,7 +306,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           break;
       }
     },
-    [chat, router, pushToast],
+    [chat, router, pushToast, refreshBookmarks, performToggleSave],
   );
 
   // pending…AfterAuth: run the deferred action once login lands.
@@ -275,19 +356,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const toggleSave = useCallback(
     (product: Product) => {
       if (!isLoggedIn) {
-        requireLogin({ kind: 'wishlist', productId: product.id });
+        requireLogin({ kind: 'wishlist', product });
         return;
       }
-      setSavedIds((prev) => {
-        if (prev.includes(product.id)) {
-          pushToast('Dihapus dari Incaran');
-          return prev.filter((id) => id !== product.id);
-        }
-        pushToast('Tersimpan ke Incaran');
-        return [...prev, product.id];
-      });
+      performToggleSave(product);
     },
-    [isLoggedIn, requireLogin, pushToast],
+    [isLoggedIn, requireLogin, performToggleSave],
   );
 
   const openProfile = useCallback(() => {
@@ -392,7 +466,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: AppContextValue = {
     isLoggedIn,
     user,
-    savedIds,
+    savedIds: savedProducts.map((p) => p.id),
+    savedProducts,
+    savedLoading,
     inspeksiRequests,
     chat,
     dockExpanded,

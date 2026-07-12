@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Search, SearchX, SlidersHorizontal, WifiOff, X } from 'lucide-react';
-import type { Product, ProductCategory } from '../types/product';
+import type { Product } from '../types/product';
 import { searchSuggestions } from '../data/categories';
+import { useCategories } from '../hooks/useCategories';
 import { useCatalogListings } from '../hooks/useCatalogListings';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import {
-  applyFilters,
+  conditionFor,
   DEFAULT_FILTERS,
   FilterPanel,
   priceRangeFor,
@@ -18,26 +19,19 @@ import { EmptyState } from '../components/ui/EmptyState';
 
 type CatalogPageProps = {
   savedIds: string[];
-  initialCategory: ProductCategory | null;
+  /** Category slug from /api/v1/categories, or null for all. */
+  initialCategory: string | null;
   initialQuery: string;
   onOpenProduct: (product: Product) => void;
   onToggleSave: (product: Product) => void;
 };
 
-const CATEGORY_CHIPS: { id: ProductCategory | 'semua'; label: string }[] = [
-  { id: 'semua', label: 'Semua' },
-  { id: 'motor', label: 'Motor' },
-  { id: 'sparepart', label: 'Sparepart' },
-  { id: 'aksesoris', label: 'Aksesoris' },
-];
-
 // Remembers the catalog UI (chips/search/filters) across client navigation so
 // returning from a detail page restores the same view, not a reset one. Bound
 // to the URL params it was opened with, so a fresh deep-link starts clean.
 type CatalogUI = {
-  initialCategory: ProductCategory | null;
+  initialCategory: string | null;
   initialQuery: string;
-  category: ProductCategory | 'semua';
   query: string;
   filters: CatalogFilters;
 };
@@ -57,27 +51,36 @@ export function CatalogPage({
       ? catalogUI
       : null;
 
-  const [category, setCategory] = useState<ProductCategory | 'semua'>(
-    restored?.category ?? initialCategory ?? 'semua',
-  );
   const [query, setQuery] = useState(restored?.query ?? initialQuery);
   const [filters, setFilters] = useState<CatalogFilters>(
-    restored?.filters ?? DEFAULT_FILTERS,
+    restored?.filters ?? {
+      ...DEFAULT_FILTERS,
+      kategori: initialCategory ?? 'semua',
+    },
   );
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const { categories } = useCategories();
+  const categoryChips = useMemo(
+    () => [
+      { slug: 'semua', label: 'Semua' },
+      ...categories.map((c) => ({ slug: c.slug, label: c.name })),
+    ],
+    [categories],
+  );
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
   // Persist the UI so a later remount (back from detail) can restore it.
   useEffect(() => {
-    catalogUI = { initialCategory, initialQuery, category, query, filters };
-  }, [initialCategory, initialQuery, category, query, filters]);
+    catalogUI = { initialCategory, initialQuery, query, filters };
+  }, [initialCategory, initialQuery, query, filters]);
 
-  // Server-side: category, search, price (Harga), year (Tahun) and city (Lokasi).
+  // Every filter maps to an API param — any change refetches from the server.
   const { minPrice, maxPrice } = priceRangeFor(filters.harga);
   const { yearMin, yearMax } = yearRangeFor(filters.tahun);
   const {
-    products: fetched,
+    products: results,
     loading,
     loadingMore,
     error,
@@ -86,7 +89,8 @@ export function CatalogPage({
     loadMore,
     reload,
   } = useCatalogListings({
-    category: category === 'semua' ? null : category,
+    categorySlug: filters.kategori === 'semua' ? null : filters.kategori,
+    condition: conditionFor(filters.kondisi),
     query: debouncedQuery,
     minPrice,
     maxPrice,
@@ -94,18 +98,6 @@ export function CatalogPage({
     yearMax,
     city: filters.lokasi === 'Semua' ? undefined : filters.lokasi,
   });
-
-  // Client-side refine only for what the API can't do (Jenis/condition).
-  const results = useMemo(
-    () =>
-      applyFilters(fetched, {
-        ...filters,
-        harga: 'Semua',
-        lokasi: 'Semua',
-        tahun: 'Semua',
-      }),
-    [fetched, filters],
-  );
 
   // Auto-load the next page when the sentinel scrolls into view.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -166,11 +158,11 @@ export function CatalogPage({
         </div>
 
         <div className="category-chip-row">
-          {CATEGORY_CHIPS.map((chip) => (
+          {categoryChips.map((chip) => (
             <button
-              key={chip.id}
-              className={`category-chip ${category === chip.id ? 'active' : ''}`}
-              onClick={() => setCategory(chip.id)}
+              key={chip.slug}
+              className={`category-chip ${filters.kategori === chip.slug ? 'active' : ''}`}
+              onClick={() => setFilters({ ...filters, kategori: chip.slug })}
             >
               {chip.label}
             </button>
@@ -178,7 +170,7 @@ export function CatalogPage({
         </div>
 
         <div className="catalog-body">
-          <FilterPanel filters={filters} onChange={setFilters} />
+          <FilterPanel categories={categories} filters={filters} onChange={setFilters} />
 
           <div>
             {!loading && error ? (
@@ -203,7 +195,6 @@ export function CatalogPage({
                     onClick={() => {
                       setQuery('');
                       setFilters(DEFAULT_FILTERS);
-                      setCategory('semua');
                     }}
                   >
                     Reset pencarian
@@ -275,6 +266,7 @@ export function CatalogPage({
             onClick={() => setSheetOpen(false)}
           />
           <FilterPanel
+            categories={categories}
             filters={filters}
             onChange={setFilters}
             sheetOpen

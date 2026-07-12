@@ -15,7 +15,9 @@ export function SavedBinding() {
 
   return (
     <SavedPage
+      products={isLoggedIn ? app.savedProducts : []}
       savedIds={isLoggedIn ? app.savedIds : []}
+      loading={app.savedLoading}
       onOpenProduct={app.openProduct}
       onToggleSave={app.toggleSave}
       onExploreCatalog={() => app.exploreCatalog()}

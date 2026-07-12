@@ -53,6 +53,10 @@ export function ProductCard({
             alt={product.title}
             style={{ height: mediaHeight }}
           />
+          <span className="product-card-caption">
+            <span className="product-card-caption-title">{product.title}</span>
+            <span className="product-card-caption-price">{product.price}</span>
+          </span>
         </button>
         <button
           className={`product-card-save ${saved ? 'saved' : ''}`}

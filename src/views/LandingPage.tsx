@@ -14,8 +14,9 @@ import {
   TicketPercent,
   Wrench,
 } from "lucide-react";
-import type { Product, ProductCategory } from "../types/product";
-import { categories } from "../data/categories";
+import type { Product } from "../types/product";
+import { categoryMeta } from "../data/categories";
+import { useCategories } from "../hooks/useCategories";
 import { dealers } from "../data/dealers";
 import { featuredProductIds, getProduct, products } from "../data/products";
 import { Button } from "../components/ui/Button";
@@ -24,7 +25,7 @@ import { ProductGrid } from "../components/catalog/ProductGrid";
 
 type LandingPageProps = {
   savedIds: string[];
-  onExploreCatalog: (category?: ProductCategory, query?: string) => void;
+  onExploreCatalog: (categorySlug?: string, query?: string) => void;
   onOpenChat: () => void;
   onOpenProduct: (product: Product) => void;
   onToggleSave: (product: Product) => void;
@@ -76,6 +77,7 @@ export function LandingPage({
   onOpenDealer,
   onOpenInspeksi,
 }: LandingPageProps) {
+  const { categories } = useCategories();
   const featured = featuredProductIds
     .map((id) => getProduct(id))
     .filter((p): p is Product => Boolean(p))
@@ -171,23 +173,26 @@ export function LandingPage({
             </div>
           </div>
           <div className="category-grid">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className="category-card"
-                onClick={() => onExploreCatalog(cat.id)}
-              >
-                <img src={cat.image} alt="" />
-                <span className="category-card-body">
-                  <h3>{cat.label}</h3>
-                  <p>{cat.description}</p>
-                  <span>
-                    Jelajahi {cat.label}
-                    <ArrowRight size={14} />
+            {categories.map((cat) => {
+              const meta = categoryMeta(cat.slug);
+              return (
+                <button
+                  key={cat.slug}
+                  className="category-card"
+                  onClick={() => onExploreCatalog(cat.slug)}
+                >
+                  <img src={meta.image} alt="" />
+                  <span className="category-card-body">
+                    <h3>{cat.name}</h3>
+                    <p>{meta.description}</p>
+                    <span>
+                      Jelajahi {cat.name}
+                      <ArrowRight size={14} />
+                    </span>
                   </span>
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>

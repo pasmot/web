@@ -7,7 +7,13 @@ export type ProductTag =
 export type ProductCategory = 'motor' | 'sparepart' | 'aksesoris';
 
 export type Product = {
+  /** Public listing id (UUID), used in URLs and as the React key. */
   id: string;
+  /**
+   * Internal integer id (`listings.id`) — required by the bookmark endpoints.
+   * Absent on static prototype products, which then only toggle locally.
+   */
+  internalId?: number;
   title: string;
   /** Display price, e.g. "Rp. 31,5 Juta" */
   price: string;

@@ -7,13 +7,16 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Product, ProductCategory } from '../types/product';
+import type { Product } from '../types/product';
 import { fetchCatalog, type CatalogQuery } from '../lib/api';
 
 const PAGE_SIZE = 24;
 
 export type CatalogParams = {
-  category: ProductCategory | null;
+  /** Category slug from /api/v1/categories, or null for all. */
+  categorySlug: string | null;
+  /** 'baru' | 'bekas', or undefined for all. */
+  condition?: string;
   query: string;
   minPrice?: number;
   maxPrice?: number;
@@ -48,7 +51,8 @@ const catalogCache = new Map<string, CacheEntry>();
 
 const keyOf = (p: CatalogParams): string =>
   JSON.stringify([
-    p.category,
+    p.categorySlug,
+    p.condition ?? null,
     p.query,
     p.minPrice ?? null,
     p.maxPrice ?? null,
@@ -100,7 +104,8 @@ export function useCatalogListings(params: CatalogParams) {
   const buildQuery = (page: number): CatalogQuery => {
     const p = paramsRef.current;
     return {
-      category: p.category,
+      categorySlug: p.categorySlug,
+      condition: p.condition,
       q: p.query,
       minPrice: p.minPrice,
       maxPrice: p.maxPrice,
