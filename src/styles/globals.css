@@ -381,6 +381,13 @@ a {
   gap: 8px;
 }
 
+/* Design: "Masuk" is a black pill button */
+.header-actions .btn-dark {
+  border-radius: var(--radius-pill);
+  padding: 0 22px;
+  min-height: 42px;
+}
+
 .header-avatar {
   width: 38px;
   height: 38px;

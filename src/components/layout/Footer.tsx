@@ -12,7 +12,7 @@ export function Footer({ onNavigate }: FooterProps) {
         <div className="footer-grid">
           <div>
             <div className="footer-brand">
-              <img src="/brand/pasarmotor-logo.png" alt="PasarMotor" />
+              <img src="/PM - Logo_Final_White.svg" alt="PasarMotor" />
               <span>
                 Pasar<em>Motor</em>
               </span>

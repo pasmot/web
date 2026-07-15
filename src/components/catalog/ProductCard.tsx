@@ -110,9 +110,10 @@ export function ProductCard({
             <MapPin size={12} />
             {product.location}
           </span>
-          {product.year && <span>{product.year}</span>}
-          {product.mileage && <span>{product.mileage}</span>}
-          {product.rating && (
+          {/* Row (landing) cards show location only, per design */}
+          {!uniform && product.year && <span>{product.year}</span>}
+          {!uniform && product.mileage && <span>{product.mileage}</span>}
+          {!uniform && product.rating && (
             <span className="product-card-rating">
               <Star size={12} />
               {product.rating.toFixed(1)}

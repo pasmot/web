@@ -12,8 +12,6 @@ export function LandingBinding() {
       onOpenChat={() => app.setDockExpanded(true)}
       onOpenProduct={app.openProduct}
       onToggleSave={app.toggleSave}
-      onOpenDealer={app.openDealer}
-      onOpenInspeksi={() => app.requestInspeksi(null)}
     />
   );
 }

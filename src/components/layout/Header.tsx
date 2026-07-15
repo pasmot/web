@@ -3,7 +3,7 @@ import { Bookmark, Menu, X } from 'lucide-react';
 import type { AppView } from '../../types/app';
 import { Button } from '../ui/Button';
 
-const navLogo = '/Nav-Horizontal.png';
+const navLogo = '/pm-logo-horizontal.svg';
 
 type HeaderProps = {
   activeView: AppView;
