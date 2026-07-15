@@ -12,9 +12,9 @@ import type { Product } from '../types/product';
  */
 const SESSION_KEY = 'chat_session_id';
 
-// The backend times out the upstream AI at ~20s; abort slightly later so a
-// genuine 504 surfaces rather than the request hanging forever.
-const CLIENT_TIMEOUT_MS = 22_000;
+// Heavy queries (product grounding, comparisons) can take well over 20s, so we
+// give the AI plenty of headroom before aborting rather than showing a timeout.
+const CLIENT_TIMEOUT_MS = 100_000;
 
 /** Per-tab session id (sessionStorage avoids cross-tab 409 collisions). */
 export function getSessionId(): string {
