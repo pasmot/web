@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+import { COMPANY } from '../../data/company';
+
 /** Apple logo (mono white) — official badge style */
 function AppleLogo() {
   return (
@@ -31,33 +34,57 @@ function GooglePlayLogo() {
   );
 }
 
+/**
+ * Tautan toko aplikasi. Selama URL-nya belum diisi di data/company.ts, badge
+ * tampil sebagai elemen mati bertanda "segera hadir" — bukan tautan palsu.
+ */
+function StoreBadge({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+}) {
+  if (!href) {
+    return (
+      <span className="store-badge" aria-label={`${label} — segera hadir`} aria-disabled>
+        {children}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      className="store-badge"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+    >
+      {children}
+    </a>
+  );
+}
+
 export function StoreBadges() {
   return (
     <div className="store-badges">
-      <a
-        className="store-badge"
-        href="#"
-        onClick={(e) => e.preventDefault()}
-        aria-label="Available on the App Store"
-      >
+      <StoreBadge href={COMPANY.appStoreUrl} label="Available on the App Store">
         <AppleLogo />
         <span>
           <small>Available on the</small>
           <strong>App Store</strong>
         </span>
-      </a>
-      <a
-        className="store-badge"
-        href="#"
-        onClick={(e) => e.preventDefault()}
-        aria-label="Get it on Google Play"
-      >
+      </StoreBadge>
+      <StoreBadge href={COMPANY.playStoreUrl} label="Get it on Google Play">
         <GooglePlayLogo />
         <span>
           <small>GET IT ON</small>
           <strong>Google Play</strong>
         </span>
-      </a>
+      </StoreBadge>
     </div>
   );
 }

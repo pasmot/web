@@ -1,0 +1,376 @@
+/* ---------- Pusat Bantuan & Hubungi Kami ---------- */
+
+.help-page,
+.contact-page {
+  padding: 36px 0 96px;
+}
+
+.help-head,
+.contact-head {
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.help-head h1,
+.contact-head h1 {
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.help-head p,
+.contact-head p {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+/* ---------- Kartu panduan ---------- */
+
+.help-guides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.help-guide-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    border-color 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out),
+    transform 0.18s var(--ease-out);
+}
+
+.help-guide-card:hover {
+  border-color: var(--brand-red);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+.help-guide-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-md);
+  background: var(--brand-red-soft);
+  color: var(--brand-red-deep);
+}
+
+.help-guide-card strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.help-guide-desc {
+  color: var(--color-muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* ---------- FAQ ---------- */
+
+.help-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 32px;
+  align-items: start;
+}
+
+.help-topic + .help-topic {
+  margin-top: 36px;
+}
+
+.help-topic h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+.help-topic-blurb {
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.help-faq {
+  list-style: none;
+  margin-top: 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.help-faq-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color 0.18s var(--ease-out);
+}
+
+.help-faq-item.open {
+  border-color: var(--brand-red);
+  box-shadow: var(--shadow-card);
+}
+
+.help-faq-item button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.help-faq-item button svg {
+  flex: none;
+  color: var(--color-faint);
+  transition: transform 0.18s var(--ease-out);
+}
+
+.help-faq-item.open button svg {
+  transform: rotate(180deg);
+  color: var(--brand-red);
+}
+
+.help-faq-item p {
+  padding: 0 18px 18px;
+  color: var(--color-muted);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+/* ---------- Sidebar bantuan ---------- */
+
+.help-aside {
+  position: sticky;
+  top: calc(var(--header-height) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.help-contact-card,
+.help-links-card {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.help-contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--brand-red-soft);
+  color: var(--brand-red-deep);
+}
+
+.help-contact-card h2,
+.help-links-card h2 {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.help-links-card h2 {
+  margin-top: 0;
+}
+
+.help-contact-card p {
+  margin: 6px 0 16px;
+  color: var(--color-muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.help-links-card ul {
+  list-style: none;
+  margin-top: 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-links-card a {
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.help-links-card a:hover {
+  color: var(--brand-red-deep);
+}
+
+/* ---------- Hubungi Kami ---------- */
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    border-color 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out),
+    transform 0.18s var(--ease-out);
+}
+
+.contact-card:not(.static):hover {
+  border-color: var(--brand-red);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+.contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+}
+
+.contact-icon.wa {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.contact-card strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.contact-value {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--brand-red-deep);
+  word-break: break-word;
+}
+
+.contact-card.static .contact-value {
+  color: var(--color-text);
+}
+
+.contact-note {
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.contact-warning {
+  display: flex;
+  gap: 14px;
+  margin-top: 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-warning-soft);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-soft);
+}
+
+.contact-warning-icon {
+  flex: none;
+  color: var(--color-warning);
+}
+
+.contact-warning h2 {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--color-warning);
+}
+
+.contact-warning p {
+  margin-top: 6px;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.contact-warning a {
+  color: var(--brand-red-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-office {
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.contact-office .contact-icon {
+  margin-bottom: 0;
+}
+
+.contact-office h2 {
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.contact-office p {
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .help-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .help-aside {
+    position: static;
+  }
+}
+
+/* Tombol toko aplikasi yang belum punya tautan — tampil mati, tidak bisa diklik. */
+.store-badge[aria-disabled],
+.footer-app-btn[aria-disabled] {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.store-badge[aria-disabled]:hover,
+.footer-app-btn[aria-disabled]:hover {
+  transform: none;
+  box-shadow: none;
+  background-color: inherit;
+}

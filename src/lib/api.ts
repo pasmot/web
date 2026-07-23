@@ -44,7 +44,8 @@ export type ApiListing = {
   seller_id: number;
   category_id: number | null;
   title: string;
-  price: number;
+  /** Scraped listings can miss the numeric price entirely. */
+  price: number | null;
   price_text: string | null;
   condition: string;
   city: string;
@@ -121,6 +122,19 @@ function tagFor(category: ProductCategory, condition: string): Product['tag'] {
   return category === 'sparepart' ? 'Sparepart Baru' : 'Aksesoris Baru';
 }
 
+/**
+ * Display price. Scraped rows can arrive with an empty `price_text` AND a null
+ * `price` — without this guard the mapper throws and takes the whole page down.
+ */
+function priceTextOf(priceText?: string | null, price?: number | null): string {
+  const text = priceText?.trim();
+  if (text) return text;
+  if (typeof price === 'number' && Number.isFinite(price)) {
+    return `Rp ${price.toLocaleString('id-ID')}`;
+  }
+  return 'Harga belum tersedia';
+}
+
 function locationOf(
   city?: string | null,
   province?: string | null,
@@ -141,8 +155,8 @@ export function mapListing(raw: ApiListing): Product {
     id: raw.listing_id,
     internalId: raw.id,
     title: raw.title,
-    price: raw.price_text?.trim() || `Rp ${raw.price.toLocaleString('id-ID')}`,
-    priceValue: raw.price,
+    price: priceTextOf(raw.price_text, raw.price),
+    priceValue: raw.price ?? 0,
     image,
     gallery: image ? [image] : [],
     tag: tagFor(category, raw.condition),
@@ -160,7 +174,7 @@ export function mapListing(raw: ApiListing): Product {
 export type ChatRecommendation = {
   listing_id: string;
   title: string;
-  price: number;
+  price: number | null;
   price_text?: string | null;
   condition?: string | null;
   city?: string | null;
@@ -182,8 +196,8 @@ export function mapRecommendation(rec: ChatRecommendation): Product {
   return {
     id: rec.listing_id,
     title: rec.title,
-    price: rec.price_text?.trim() || `Rp ${rec.price.toLocaleString('id-ID')}`,
-    priceValue: rec.price,
+    price: priceTextOf(rec.price_text, rec.price),
+    priceValue: rec.price ?? 0,
     image,
     gallery: image ? [image] : [],
     tag: tagFor(category, rec.condition ?? ''),
@@ -279,8 +293,19 @@ export async function fetchCatalog(
   if (!json.success || !Array.isArray(json.data)) {
     throw new Error('Unexpected catalog response');
   }
+  // Map defensively: the catalog is scraped, so a single malformed row must not
+  // reject the whole request and surface as "gagal terhubung ke server".
+  const items: Product[] = [];
+  for (const raw of json.data) {
+    try {
+      items.push(mapListing(raw));
+    } catch (err) {
+      console.warn('Skipping unmappable listing', raw?.listing_id, err);
+    }
+  }
+
   return {
-    items: json.data.map(mapListing),
+    items,
     total: json.meta?.total_count ?? json.data.length,
   };
 }

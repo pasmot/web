@@ -6,6 +6,8 @@ import '../styles/landing.css';
 import '../styles/catalog.css';
 import '../styles/chat.css';
 import '../styles/modals.css';
+import '../styles/legal.css';
+import '../styles/help.css';
 import { AppProvider } from '../context/AppContext';
 import { Shell } from '../components/layout/Shell';
 

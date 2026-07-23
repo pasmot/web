@@ -6,7 +6,8 @@ export type AppView =
   | 'chat'
   | 'saved'
   | 'profile'
-  | 'inspeksi';
+  | 'inspeksi'
+  | 'info';
 
 import type { Product } from './product';
 

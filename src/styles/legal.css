@@ -1,0 +1,239 @@
+/* ---------- Halaman dokumen resmi (Kebijakan Privasi, Syarat & Ketentuan) ---------- */
+
+.legal-page {
+  padding: 36px 0 96px;
+}
+
+.legal-head {
+  max-width: 760px;
+  margin-bottom: 32px;
+}
+
+.legal-head h1 {
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.legal-head > p {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+.legal-updated {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 13.5px;
+  color: var(--color-muted);
+}
+
+.legal-updated strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.legal-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+/* ---------- Daftar isi ---------- */
+
+.legal-toc {
+  position: sticky;
+  top: calc(var(--header-height) + 20px);
+  max-height: calc(100vh - var(--header-height) - 48px);
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.legal-toc h2 {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.legal-toc ol {
+  list-style: none;
+  margin-top: 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legal-toc a {
+  display: block;
+  /* Ditarik ke kiri supaya teks sejajar dengan judul "Daftar Isi". */
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out);
+}
+
+.legal-toc a:hover {
+  background: var(--color-surface-soft);
+  color: var(--brand-red-deep);
+}
+
+/* ---------- Isi dokumen ---------- */
+
+.legal-doc {
+  padding: 32px clamp(20px, 3vw, 40px) 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.75;
+  scroll-behavior: smooth;
+}
+
+.legal-doc h2 {
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border-soft);
+  font-size: clamp(19px, 2.2vw, 22px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+.legal-doc > :first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.legal-doc h3 {
+  margin-top: 28px;
+  font-size: 16.5px;
+  font-weight: 700;
+}
+
+.legal-doc p {
+  margin-top: 14px;
+}
+
+.legal-doc strong {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.legal-doc a {
+  color: var(--brand-red-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.legal-doc ul,
+.legal-doc ol {
+  margin-top: 14px;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legal-doc ul {
+  list-style: disc;
+}
+
+.legal-doc ol {
+  list-style: decimal;
+}
+
+/* Sub-daftar bernomor huruf (a, b, c …) sesuai naskah asli. */
+.legal-doc ol ol {
+  list-style: lower-alpha;
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.legal-doc li::marker {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.legal-doc blockquote {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--brand-red);
+  border-radius: var(--radius-sm);
+  background: var(--brand-red-soft);
+  color: var(--brand-red-deep);
+  font-weight: 600;
+}
+
+.legal-doc blockquote p {
+  margin-top: 0;
+}
+
+/* Tabel — gulir sendiri supaya halaman tidak melebar di layar kecil. */
+.legal-table-wrap {
+  margin-top: 18px;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.legal-doc table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.legal-doc thead {
+  background: var(--color-surface-soft);
+}
+
+.legal-doc th,
+.legal-doc td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-soft);
+  line-height: 1.6;
+}
+
+.legal-doc th {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.legal-doc tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .legal-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .legal-toc {
+    position: static;
+    max-height: none;
+  }
+
+  .legal-doc {
+    padding: 24px 18px 32px;
+    font-size: 14.5px;
+  }
+}

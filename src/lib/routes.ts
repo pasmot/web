@@ -10,6 +10,14 @@ export const VIEW_PATHS = {
   inspeksi: '/inspeksi',
 } as const;
 
+/** Halaman informasi (bantuan, kontak, dokumen resmi) — di luar navigasi utama. */
+export const INFO_PATHS = [
+  '/bantuan',
+  '/hubungi-kami',
+  '/kebijakan-privasi',
+  '/syarat-ketentuan',
+] as const;
+
 export function productPath(id: string): string {
   return `/produk/${id}`;
 }
@@ -37,5 +45,6 @@ export function viewFromPathname(pathname: string): AppView {
   if (pathname.startsWith('/incaran')) return 'saved';
   if (pathname.startsWith('/profil')) return 'profile';
   if (pathname.startsWith('/inspeksi')) return 'inspeksi';
+  if (INFO_PATHS.some((path) => pathname.startsWith(path))) return 'info';
   return 'landing';
 }

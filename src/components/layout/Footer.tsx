@@ -1,9 +1,37 @@
+import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { Apple, Play } from 'lucide-react';
 import type { AppView } from '../../types/app';
+import { COMPANY } from '../../data/company';
 
 type FooterProps = {
   onNavigate: (view: AppView) => void;
 };
+
+/** Tombol unduh aplikasi — mati sampai URL toko diisi di data/company.ts. */
+function AppButton({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+}) {
+  if (!href) {
+    return (
+      <span className="footer-app-btn" aria-label={`${label} — segera hadir`} aria-disabled>
+        {children}
+      </span>
+    );
+  }
+
+  return (
+    <a className="footer-app-btn" href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
+}
 
 export function Footer({ onNavigate }: FooterProps) {
   return (
@@ -45,24 +73,16 @@ export function Footer({ onNavigate }: FooterProps) {
             <h4>Bantuan</h4>
             <ul>
               <li>
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  Pusat Bantuan
-                </a>
+                <Link href="/bantuan">Pusat Bantuan</Link>
               </li>
               <li>
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  Kebijakan Privasi
-                </a>
+                <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
               </li>
               <li>
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  Syarat & Ketentuan
-                </a>
+                <Link href="/syarat-ketentuan">Syarat &amp; Ketentuan</Link>
               </li>
               <li>
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  Hubungi Kami
-                </a>
+                <Link href="/hubungi-kami">Hubungi Kami</Link>
               </li>
             </ul>
           </div>
@@ -70,27 +90,27 @@ export function Footer({ onNavigate }: FooterProps) {
           <div className="footer-col">
             <h4>Download Apps</h4>
             <div className="footer-apps">
-              <a className="footer-app-btn" href="#" onClick={(e) => e.preventDefault()}>
+              <AppButton href={COMPANY.appStoreUrl} label="App Store">
                 <Apple size={22} />
                 <span>
                   <small>Download di</small>
                   <strong>App Store</strong>
                 </span>
-              </a>
-              <a className="footer-app-btn" href="#" onClick={(e) => e.preventDefault()}>
+              </AppButton>
+              <AppButton href={COMPANY.playStoreUrl} label="Google Play">
                 <Play size={20} />
                 <span>
                   <small>Dapatkan di</small>
                   <strong>Google Play</strong>
                 </span>
-              </a>
+              </AppButton>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <span>© 2026 PasarMotor · Prototype UI — semua data bersifat mock.</span>
-          <span>Jual-beli & transaksi penuh tersedia di Apps PasarMotor.</span>
+          <span>© 2026 {COMPANY.legalName}. Seluruh hak cipta dilindungi.</span>
+          <span>Jual-beli &amp; transaksi penuh tersedia di Apps PasarMotor.</span>
         </div>
       </div>
     </footer>
