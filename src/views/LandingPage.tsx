@@ -180,8 +180,8 @@ export function LandingPage({
             <div>
               <h2 className="section-title">Unit pilihan minggu ini</h2>
               <p className="section-sub">
-                Dipilih dari seller terverifikasi dengan data produk lengkap
-                dan harga wajar di pasaran.
+                Dipilih dari seller terverifikasi dengan data produk lengkap dan
+                harga wajar di pasaran.
               </p>
             </div>
             <Button variant="outline" onClick={() => onExploreCatalog()}>
@@ -303,15 +303,15 @@ export function LandingPage({
       </section>
 
       {/* ---------- Final CTA ---------- */}
-      <section className="section" style={{ paddingTop: 8 }}>
+      <section className="section " style={{ paddingTop: 8 }}>
         <div className="container">
           <div className="final-cta">
             <h2>
               Siap mulai cari motor, sparepart, & aksesoris dengan lebih yakin?
             </h2>
             <p>
-              Jelajahi pasar motor, aksesoris, dan sparepart. Pake Montir AI
-              dan jasa inspeksi untuk membantu keputusan jual-belimu.
+              Jelajahi pasar motor, aksesoris, dan sparepart. Pake Montir AI dan
+              jasa inspeksi untuk membantu keputusan jual-belimu.
             </p>
             <div className="final-cta-actions">
               <Button size="lg" onClick={() => onExploreCatalog()}>
