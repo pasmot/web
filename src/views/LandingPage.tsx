@@ -303,7 +303,7 @@ export function LandingPage({
       </section>
 
       {/* ---------- Final CTA ---------- */}
-      <section className="section " style={{ paddingTop: 8 }}>
+      <section className="section" style={{ paddingTop: 8 }}>
         <div className="container">
           <div className="final-cta">
             <h2>

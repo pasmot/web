@@ -1,4 +1,7 @@
-import { isValidElement, type ReactNode } from 'react';
+'use client';
+
+import { isValidElement, useState, type ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -67,6 +70,9 @@ const components: Components = {
 
 export function LegalPage({ title, intro, lastUpdated, content }: LegalPageProps) {
   const toc = headings(content);
+  // Di mobile daftar isi dilipat supaya tidak menutupi isi dokumen; di desktop
+  // CSS memaksanya selalu terbuka sebagai sidebar (state ini diabaikan).
+  const [tocOpen, setTocOpen] = useState(false);
 
   return (
     <div className="legal-page">
@@ -80,16 +86,26 @@ export function LegalPage({ title, intro, lastUpdated, content }: LegalPageProps
         </header>
 
         <div className="legal-layout">
-          <aside className="legal-toc" aria-label="Daftar isi">
-            <h2>Daftar Isi</h2>
+          <nav className={`legal-toc ${tocOpen ? 'open' : ''}`} aria-label="Daftar isi">
+            <button
+              type="button"
+              className="legal-toc-toggle"
+              aria-expanded={tocOpen}
+              onClick={() => setTocOpen((v) => !v)}
+            >
+              Daftar Isi
+              <ChevronDown size={18} className="legal-toc-chevron" />
+            </button>
             <ol>
               {toc.map((item) => (
                 <li key={item.id}>
-                  <a href={`#${item.id}`}>{item.label}</a>
+                  <a href={`#${item.id}`} onClick={() => setTocOpen(false)}>
+                    {item.label}
+                  </a>
                 </li>
               ))}
             </ol>
-          </aside>
+          </nav>
 
           <article className="legal-doc">
             <ReactMarkdown

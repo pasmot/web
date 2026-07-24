@@ -54,12 +54,23 @@
   background: var(--color-surface);
 }
 
-.legal-toc h2 {
+.legal-toc-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-faint);
+  /* Di desktop ini cuma judul, tidak bisa diklik (lihat media query di bawah). */
+  cursor: default;
+  pointer-events: none;
+}
+
+.legal-toc-chevron {
+  display: none;
 }
 
 .legal-toc ol {
@@ -224,12 +235,49 @@
 @media (max-width: 900px) {
   .legal-layout {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 16px;
   }
 
+  /* Daftar isi jadi panel yang bisa dilipat — tidak lagi menutupi isi dokumen. */
   .legal-toc {
     position: static;
     max-height: none;
+    padding: 4px 16px;
+    overflow: visible;
+  }
+
+  .legal-toc-toggle {
+    /* Bisa diklik lagi di mobile, dengan chevron sebagai penanda. */
+    pointer-events: auto;
+    cursor: pointer;
+    padding: 14px 0;
+    font-size: 13px;
+  }
+
+  .legal-toc-chevron {
+    display: block;
+    color: var(--color-muted);
+    transition: transform 0.18s var(--ease-out);
+  }
+
+  .legal-toc.open .legal-toc-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Tersembunyi saat terlipat; muncul hanya ketika dibuka. */
+  .legal-toc ol {
+    display: none;
+    margin-top: 0;
+    padding-bottom: 12px;
+  }
+
+  .legal-toc.open ol {
+    display: flex;
+  }
+
+  .legal-toc a {
+    padding: 9px 8px;
+    font-size: 14px;
   }
 
   .legal-doc {
