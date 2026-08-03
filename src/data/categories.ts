@@ -22,8 +22,7 @@ export const CATEGORY_META: Record<string, { description: string; image: string 
   },
   'spare-part-motor': {
     description: 'Part original & aftermarket',
-    image:
-      'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=900&q=80',
+    image: '/sparepart.png',
   },
   'aksesoris-motor': {
     description: 'Helm, jaket & gear riding',
@@ -40,6 +39,18 @@ const DEFAULT_CATEGORY_META = {
 
 export const categoryMeta = (slug: string) =>
   CATEGORY_META[slug] ?? DEFAULT_CATEGORY_META;
+
+/**
+ * Preferred order for the landing-page category cards (spare part first),
+ * independent of the order the API returns categories in. Unlisted slugs
+ * keep their original order and fall after the listed ones.
+ */
+const CATEGORY_CARD_ORDER = ['spare-part-motor', 'aksesoris-motor', 'motor'];
+
+export const categoryCardRank = (slug: string) => {
+  const i = CATEGORY_CARD_ORDER.indexOf(slug);
+  return i === -1 ? CATEGORY_CARD_ORDER.length : i;
+};
 
 export const filterOptions = {
   kondisi: ['Semua', 'Baru', 'Bekas'],

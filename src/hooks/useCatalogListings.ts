@@ -23,6 +23,14 @@ export type CatalogParams = {
   yearMin?: number;
   yearMax?: number;
   city?: string;
+  /* --- GenAI taxonomy facets ('' / undefined = no filter) --- */
+  brand?: string;
+  tipeMotor?: string;
+  ccRange?: string;
+  kondisiOrisinalitas?: string;
+  sellerType?: string;
+  source?: string;
+  isVerified?: boolean;
 };
 
 type CatalogState = {
@@ -59,6 +67,13 @@ const keyOf = (p: CatalogParams): string =>
     p.yearMin ?? null,
     p.yearMax ?? null,
     p.city ?? null,
+    p.brand ?? null,
+    p.tipeMotor ?? null,
+    p.ccRange ?? null,
+    p.kondisiOrisinalitas ?? null,
+    p.sellerType ?? null,
+    p.source ?? null,
+    p.isVerified ?? null,
   ]);
 
 // Avoid the SSR warning for useLayoutEffect while still restoring scroll
@@ -112,6 +127,13 @@ export function useCatalogListings(params: CatalogParams) {
       yearMin: p.yearMin,
       yearMax: p.yearMax,
       city: p.city,
+      brand: p.brand,
+      tipeMotor: p.tipeMotor,
+      ccRange: p.ccRange,
+      kondisiOrisinalitas: p.kondisiOrisinalitas,
+      sellerType: p.sellerType,
+      source: p.source,
+      isVerified: p.isVerified,
       page,
       limit: PAGE_SIZE,
     };
@@ -170,8 +192,10 @@ export function useCatalogListings(params: CatalogParams) {
   }, [cacheKey, nonce]);
 
   // Persist the scroll position on unmount; restore it when returning.
+  // On a fresh visit (no cache) start at the top — otherwise the window keeps
+  // whatever scroll position the previous page (e.g. the landing) was left at.
   useIsoLayoutEffect(() => {
-    if (cached?.scrollY) window.scrollTo(0, cached.scrollY);
+    window.scrollTo(0, cached?.scrollY ?? 0);
     return () => {
       const entry = catalogCache.get(cacheKeyRef.current);
       if (entry) entry.scrollY = window.scrollY;

@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2, PackageSearch } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, MessageCircle, PackageSearch } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { ProductImage } from '../ui/ProductImage';
 import { INSPEKSI_FEE, formatRupiah } from '../../data/inspeksi';
+import { buildWhatsAppUrl } from '../../lib/contact';
 import type { Product } from '../../types/product';
 
 type InspeksiFormModalProps = {
   open: boolean;
   product: Product | null;
   onClose: () => void;
-  /** Submits to the API; resolves with the authoritative fee or rejects. */
-  onSubmit: (data: {
-    scheduledDate: string;
-    meetingLocation: string;
-    notes: string;
-  }) => Promise<{ feeAmount: number }>;
+  /** Registers the inspection with the API; resolves with the authoritative fee. */
+  onSubmit: () => Promise<{ feeAmount: number }>;
   /** Sends the user to browse listings when no inspectable unit is set. */
   onBrowse: () => void;
 };
@@ -27,9 +23,6 @@ export function InspeksiFormModal({
   onSubmit,
   onBrowse,
 }: InspeksiFormModalProps) {
-  const [schedule, setSchedule] = useState('');
-  const [location, setLocation] = useState('');
-  const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Fee from the successful response — presence flags the success screen.
@@ -37,9 +30,6 @@ export function InspeksiFormModal({
 
   useEffect(() => {
     if (open) {
-      setSchedule('');
-      setLocation('');
-      setNote('');
       setSubmitting(false);
       setError(null);
       setSuccessFee(null);
@@ -60,9 +50,9 @@ export function InspeksiFormModal({
           <h2>Inspeksi berhasil diajukan</h2>
           <p>
             Permintaan inspeksi untuk <strong>{product?.title}</strong> sudah masuk
-            dengan status <strong>menunggu</strong> · biaya{' '}
-            <strong>{formatRupiah(successFee)}</strong>. Montir kami akan
-            menghubungimu.
+            ke daftar inspeksimu dengan status <strong>menunggu</strong> · biaya{' '}
+            <strong>{formatRupiah(successFee)}</strong>. Lanjutkan koordinasi jadwal
+            dan lokasi lewat WhatsApp.
           </p>
           <div className="modal-actions" style={{ marginTop: 20 }}>
             <Button variant="dark" block onClick={onClose}>
@@ -101,17 +91,22 @@ export function InspeksiFormModal({
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const detail = [product.location, product.year, product.mileage]
+    .filter(Boolean)
+    .join(' · ');
+  const message = `Halo PasarMotor, saya ingin mengajukan jasa inspeksi montir untuk unit ${product.title}${
+    product.location ? ` di ${product.location}` : ''
+  }. Mohon info jadwal dan lokasi inspeksinya. Terima kasih.`;
+  const waUrl = buildWhatsAppUrl(message);
+
+  // Register the inspection (adds it to the user's list) while WhatsApp opens in
+  // a new tab from the same click. Don't preventDefault — the anchor navigates.
+  const handleWhatsApp = async () => {
     if (submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      const { feeAmount } = await onSubmit({
-        scheduledDate: schedule,
-        meetingLocation: location,
-        notes: note,
-      });
+      const { feeAmount } = await onSubmit();
       setSuccessFee(feeAmount);
     } catch (err) {
       setError(
@@ -123,82 +118,53 @@ export function InspeksiFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth={440}>
-      <form className="form-modal" onSubmit={handleSubmit}>
+    <Modal open={open} onClose={onClose} maxWidth={420}>
+      <div className="wa-modal">
         <h2>Ajukan Inspeksi Montir</h2>
         <p>
-          Montir akan cek mesin, rangka, CVT, kelistrikan, dokumen, dan estimasi biaya
-          perbaikan.
+          Montir kami akan cek mesin, rangka, CVT, kelistrikan, dokumen, dan estimasi
+          biaya perbaikan. Jadwal dan lokasi dikoordinasikan lewat WhatsApp.
         </p>
 
         <div className="form-product-pill">
-          <ProductImage src={product.image} alt="" compact />
+          <img src={product.image} alt="" />
           <div>
             <strong>{product.title}</strong>
-            <small>
-              {[product.location, product.year, product.mileage]
-                .filter(Boolean)
-                .join(' · ')}
-            </small>
+            <small>{detail || 'Unit yang akan diinspeksi'}</small>
           </div>
         </div>
 
-        <div className="form-field">
-          <label htmlFor="inspeksi-jadwal">Jadwal inspeksi</label>
-          <input
-            id="inspeksi-jadwal"
-            type="date"
-            required
-            value={schedule}
-            onChange={(e) => setSchedule(e.target.value)}
-          />
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="inspeksi-lokasi">Lokasi bertemu</label>
-          <input
-            id="inspeksi-lokasi"
-            type="text"
-            required
-            placeholder="cth. Showroom dealer, Jakarta Selatan"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="inspeksi-catatan">Catatan untuk montir (opsional)</label>
-          <textarea
-            id="inspeksi-catatan"
-            placeholder="cth. Tolong fokus cek suara CVT dan bekas repaint"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </div>
+        <div className="wa-message-label">Pesan yang akan dikirim:</div>
+        <div className="wa-message-preview">{message}</div>
 
         {error && (
-          <div className="chat-error" style={{ marginTop: 4 }}>
+          <div className="chat-error" style={{ marginTop: 12 }}>
             <AlertCircle size={13} />
             {error}
           </div>
         )}
 
         <div className="modal-actions">
-          <Button type="submit" block disabled={submitting}>
-            {submitting ? (
-              <>
-                <Loader2 size={16} className="spin" />
-                Mengajukan…
-              </>
-            ) : (
-              `Ajukan Inspeksi · ${formatRupiah(INSPEKSI_FEE)}`
-            )}
-          </Button>
-          <Button type="button" variant="ghost" block onClick={onClose} disabled={submitting}>
+          <a href={waUrl} target="_blank" rel="noreferrer" onClick={handleWhatsApp}>
+            <Button variant="wa" block disabled={submitting}>
+              {submitting ? (
+                <>
+                  <Loader2 size={16} className="spin" />
+                  Mengajukan…
+                </>
+              ) : (
+                <>
+                  <MessageCircle size={18} />
+                  Ajukan &amp; Chat via WhatsApp · {formatRupiah(INSPEKSI_FEE)}
+                </>
+              )}
+            </Button>
+          </a>
+          <Button variant="ghost" block onClick={onClose} disabled={submitting}>
             Batal
           </Button>
         </div>
-      </form>
+      </div>
     </Modal>
   );
 }

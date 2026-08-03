@@ -14,7 +14,7 @@ import {
   Wrench,
 } from "lucide-react";
 import type { Product } from "../types/product";
-import { categoryMeta } from "../data/categories";
+import { categoryMeta, categoryCardRank } from "../data/categories";
 import { useCategories } from "../hooks/useCategories";
 import { useFeaturedListings } from "../hooks/useFeaturedListings";
 import { featuredProductIds, getProduct } from "../data/products";
@@ -149,7 +149,11 @@ export function LandingPage({
             <h2 className="section-title">Mulai dari yang kamu butuhkan</h2>
           </div>
           <div className="category-grid">
-            {categories.map((cat) => {
+            {[...categories]
+              .sort(
+                (a, b) => categoryCardRank(a.slug) - categoryCardRank(b.slug),
+              )
+              .map((cat) => {
               const meta = categoryMeta(cat.slug);
               return (
                 <button

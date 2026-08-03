@@ -4,8 +4,8 @@
  * backend — the authoritative amount comes back on the response (fee_amount)
  * and is what the confirmation + list actually display.
  */
-export const INSPEKSI_FEE = 299_000;
+export const INSPEKSI_FEE = 99_000;
 
-/** Formats an integer rupiah amount, e.g. 299000 → "Rp299.000". */
+/** Formats an integer rupiah amount, e.g. 99000 → "Rp99.000". */
 export const formatRupiah = (amount: number): string =>
   `Rp${amount.toLocaleString('id-ID')}`;

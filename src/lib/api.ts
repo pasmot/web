@@ -94,6 +94,82 @@ export async function fetchCategories(init?: RequestInit): Promise<Category[]> {
   return [...json.data].sort((a, b) => a.id - b.id);
 }
 
+/* ---------- catalog facets (filter options) ---------- */
+
+/** A single filter option. `value` is sent back to the API verbatim. */
+export type FacetOption = { value: string; label: string; count: number };
+
+/**
+ * Filter option lists from /api/v1/catalog/facets. Backend curates and orders
+ * these (drops count=0 / placeholder values, cleans labels), so the frontend
+ * must NOT hardcode or normalize them — send each `value` as-is.
+ */
+export type Facets = {
+  brand: FacetOption[];
+  tipe_motor: FacetOption[];
+  cc_range: FacetOption[];
+  kondisi_orisinalitas: FacetOption[];
+  category_name: FacetOption[];
+  source: FacetOption[];
+  condition: FacetOption[];
+  seller_type: FacetOption[];
+};
+
+const EMPTY_FACETS: Facets = {
+  brand: [],
+  tipe_motor: [],
+  cc_range: [],
+  kondisi_orisinalitas: [],
+  category_name: [],
+  source: [],
+  condition: [],
+  seller_type: [],
+};
+
+function toFacetOptions(raw: unknown): FacetOption[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (o): o is FacetOption =>
+        o && typeof o.value === 'string' && typeof o.label === 'string',
+    )
+    .map((o) => ({
+      value: o.value,
+      label: o.label,
+      count: typeof o.count === 'number' ? o.count : 0,
+    }));
+}
+
+/**
+ * Filter facets from /api/v1/catalog/facets. Missing keys degrade to empty
+ * lists (that group just won't render), so a partial/older response is safe.
+ */
+export async function fetchFacets(init?: RequestInit): Promise<Facets> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/catalog/facets`,
+    withOrigin(init),
+  );
+  if (!res.ok) throw new Error(`Facets request failed (HTTP ${res.status})`);
+
+  const json: ApiEnvelope<Partial<Record<keyof Facets, unknown>>> =
+    await res.json();
+  if (!json.success || !json.data) throw new Error('Unexpected facets response');
+
+  const d = json.data;
+  return {
+    brand: toFacetOptions(d.brand),
+    tipe_motor: toFacetOptions(d.tipe_motor),
+    cc_range: toFacetOptions(d.cc_range),
+    kondisi_orisinalitas: toFacetOptions(d.kondisi_orisinalitas),
+    category_name: toFacetOptions(d.category_name),
+    source: toFacetOptions(d.source),
+    condition: toFacetOptions(d.condition),
+    seller_type: toFacetOptions(d.seller_type),
+  };
+}
+
+export { EMPTY_FACETS };
+
 // Display grouping only (tag/label on cards). The filter itself uses the
 // category slug straight from the API, so new categories don't break it.
 const CATEGORY_BY_ID: Record<number, ProductCategory> = {
@@ -251,9 +327,15 @@ export type CatalogQuery = {
   maxPrice?: number;
   yearMin?: number;
   yearMax?: number;
+  /* --- GenAI taxonomy facets: values come from /catalog/facets, sent as-is --- */
   brand?: string;
-  ccMin?: number;
-  ccMax?: number;
+  tipeMotor?: string;
+  /** Discrete engine-capacity label, e.g. "150-250cc" (replaces cc_min/cc_max). */
+  ccRange?: string;
+  kondisiOrisinalitas?: string;
+  sellerType?: string;
+  source?: string;
+  isVerified?: boolean;
   page?: number;
   limit?: number;
 };
@@ -277,9 +359,16 @@ export async function fetchCatalog(
   if (params.maxPrice != null) sp.set('max_price', String(params.maxPrice));
   if (params.yearMin != null) sp.set('year_min', String(params.yearMin));
   if (params.yearMax != null) sp.set('year_max', String(params.yearMax));
+  // Taxonomy facets — only sent when set. Empty values must NOT be serialized:
+  // the API now returns 400 for invalid params (e.g. "undefined"/"NaN").
   if (params.brand?.trim()) sp.set('brand', params.brand.trim());
-  if (params.ccMin != null) sp.set('cc_min', String(params.ccMin));
-  if (params.ccMax != null) sp.set('cc_max', String(params.ccMax));
+  if (params.tipeMotor?.trim()) sp.set('tipe_motor', params.tipeMotor.trim());
+  if (params.ccRange?.trim()) sp.set('cc_range', params.ccRange.trim());
+  if (params.kondisiOrisinalitas?.trim())
+    sp.set('kondisi_orisinalitas', params.kondisiOrisinalitas.trim());
+  if (params.sellerType?.trim()) sp.set('seller_type', params.sellerType.trim());
+  if (params.source?.trim()) sp.set('source', params.source.trim());
+  if (params.isVerified) sp.set('is_verified', 'true');
   sp.set('page', String(params.page ?? 1));
   sp.set('limit', String(params.limit ?? 24));
 
@@ -375,6 +464,109 @@ export async function updateMe(body: {
 
   const json: ApiEnvelope<MeProfile> = await res.json();
   return json.data;
+}
+
+/* ---------- seller onboarding (jalur manual, tanpa SSO) ---------- */
+
+/** Detail kios yang sama-sama dipakai oleh jalur SSO maupun manual. */
+export type KioskInput = {
+  /** Wajib. */
+  phone: string;
+  /** Wajib — "Nama Kios" (nama toko), bukan nama user. */
+  name: string;
+  fullAddress?: string;
+  city?: string;
+  areaPickup?: string;
+  description?: string;
+  tokopediaUrl?: string;
+  olxUrl?: string;
+  logo?: File | null;
+};
+
+/**
+ * Jalur manual (§6): identitas user diketik sendiri, tanpa Google sign-in.
+ * NOTE: nama field identitas (`email`, `full_name`) mengikuti bentuk
+ * /api/v1/me — kalau backend memakai key lain, cukup ubah di appendKioskFields
+ * caller di onboardSellerManual.
+ */
+export type SellerManualInput = KioskInput & {
+  /** Wajib — hanya format `@` yang dicek backend, TIDAK diverifikasi kepemilikan. */
+  email: string;
+  /** Wajib — nama lengkap pemilik kios. */
+  fullName: string;
+};
+
+/** Seller row returned by the onboard endpoint (fields beyond these are ignored). */
+export type OnboardedSeller = {
+  id: number;
+  seller_id: string;
+  name: string;
+  logo_url?: string | null;
+  [key: string]: unknown;
+};
+
+/** Error thrown by the onboard calls — carries the HTTP status for special-casing. */
+export class OnboardError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'OnboardError';
+    this.status = status;
+  }
+}
+
+/**
+ * True when onboarding was rejected because the email is already registered
+ * (409). Per the manual: JANGAN retry — arahkan user untuk masuk via Google.
+ */
+export function isEmailTaken(err: unknown): boolean {
+  return err instanceof OnboardError && err.status === 409;
+}
+
+/** Appends the shared kiosk fields (optional ones only when non-empty). */
+function appendKioskFields(form: FormData, input: KioskInput): void {
+  form.set('phone', input.phone.trim());
+  form.set('name', input.name.trim());
+  if (input.fullAddress?.trim()) form.set('full_address', input.fullAddress.trim());
+  if (input.city?.trim()) form.set('city', input.city.trim());
+  if (input.areaPickup?.trim()) form.set('area_pickup', input.areaPickup.trim());
+  if (input.description?.trim()) form.set('description', input.description.trim());
+  if (input.tokopediaUrl?.trim())
+    form.set('tokopedia_url', input.tokopediaUrl.trim());
+  if (input.olxUrl?.trim()) form.set('olx_url', input.olxUrl.trim());
+  if (input.logo) form.set('logo', input.logo);
+}
+
+/**
+ * Mendaftarkan user + kios sekaligus TANPA login (POST
+ * /api/v1/seller/onboard-manual). Tidak mengirim Authorization header, dan
+ * Content-Type diisi otomatis oleh browser (multipart boundary).
+ *
+ * `409` = email sudah terdaftar → lihat isEmailTaken(); jangan retry ke sini.
+ */
+export async function onboardSellerManual(
+  input: SellerManualInput,
+): Promise<OnboardedSeller> {
+  const form = new FormData();
+  // Identitas user (jalur manual) — diketik sendiri, bukan dari Google.
+  form.set('email', input.email.trim());
+  form.set('full_name', input.fullName.trim());
+  appendKioskFields(form, input);
+
+  const res = await fetch(`${API_BASE_URL}/api/v1/seller/onboard-manual`, {
+    method: 'POST',
+    body: form, // tanpa Authorization, tanpa Content-Type manual
+  });
+
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    const detail = json?.errors?.[0]?.detail as string | undefined;
+    throw new OnboardError(
+      detail ?? 'Gagal mendaftar sebagai penjual.',
+      res.status,
+    );
+  }
+  return json.data as OnboardedSeller;
 }
 
 /* ---------- bookmarks (wishlist) ---------- */

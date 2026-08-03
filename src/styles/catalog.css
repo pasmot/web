@@ -1,7 +1,7 @@
 /* ---------- Catalog layout ---------- */
 
 .catalog-page {
-  padding: 36px 0 80px;
+  padding: 20px 0 64px;
 }
 
 .catalog-head {
@@ -20,11 +20,32 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Lives in the content column, above the grid. Sticky + opaque bg so the grid
+   scrolls cleanly beneath it; sits on the same top row as the filter panel. */
 .catalog-toolbar {
+  position: sticky;
+  top: calc(var(--header-height) + 16px);
+  z-index: 40;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 22px 0 28px;
+  margin: 0 0 20px;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+/* Fills the gap between the header and the stuck search bar with page-bg so the
+   grid doesn't peek through — keeps a clean breathing space, not a flush join.
+   (Padding stays 0 so the input's top edge still lines up with the panel.) */
+.catalog-toolbar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  /* Taller than the 16px gap; the overflow tucks behind the higher-z header. */
+  height: 24px;
+  background: var(--color-bg);
 }
 
 .catalog-search {
@@ -59,13 +80,8 @@
 
 .catalog-filter-btn {
   display: none;
-}
-
-.category-chip-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
+  /* Match the search field's height (48px) so the toolbar row lines up. */
+  min-height: 48px;
 }
 
 .category-chip {
@@ -107,11 +123,18 @@
 
 .filter-panel {
   position: sticky;
-  top: calc(var(--header-height) + 20px);
+  /* Same 16px gap below the header as the search bar, so both stay aligned and
+     neither glues itself to the header. */
+  top: calc(var(--header-height) + 16px);
+  /* Cap to the viewport so a tall filter list scrolls INSIDE the panel instead
+     of overflowing the screen and breaking the sticky behaviour. */
+  max-height: calc(100vh - var(--header-height) - 32px);
+  display: flex;
+  flex-direction: column;
   background: var(--color-surface);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 22px;
+  padding: 22px 14px 18px 22px;
 }
 
 .filter-panel-head {
@@ -119,6 +142,39 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+/* The scrollable region — head stays pinned, only the groups scroll. */
+.filter-panel-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Breathing room: gap between chips and the scrollbar, and a little space
+     under the last group so the thumb never hugs the panel's bottom edge. */
+  padding-right: 8px;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.filter-panel-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.filter-panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 2px 0;
+}
+
+.filter-panel-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 7px;
+}
+
+.filter-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: #c7ccd4;
 }
 
 .filter-panel-head h3 {
@@ -148,9 +204,20 @@
 }
 
 .filter-group + .filter-group {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
   box-shadow: 0 -1px 0 var(--color-border-soft);
+}
+
+/* Collapsible section header (full-width click target). */
+.filter-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .filter-group h4 {
@@ -159,13 +226,103 @@
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--color-muted);
-  margin-bottom: 12px;
+  margin: 0;
+}
+
+.filter-group-chevron {
+  flex-shrink: 0;
+  color: var(--color-faint);
+  transition: transform 200ms var(--ease-soft);
+}
+
+.filter-group.open .filter-group-chevron {
+  transform: rotate(180deg);
+}
+
+.filter-group-head:hover h4,
+.filter-group-head:hover .filter-group-chevron {
+  color: var(--color-ink);
 }
 
 .filter-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  margin-top: 12px;
+}
+
+.filter-chip-count {
+  margin-left: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-chip.active .filter-chip-count {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Verified-seller toggle */
+.filter-group-toggle {
+  padding-top: 18px;
+}
+
+.filter-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filter-switch-track {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  flex-shrink: 0;
+  transition: background-color 160ms var(--ease-soft);
+}
+
+.filter-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(5, 5, 5, 0.22);
+  transition: transform 160ms var(--ease-soft);
+}
+
+.filter-switch input:checked + .filter-switch-track {
+  background: var(--brand-red);
+}
+
+.filter-switch input:checked + .filter-switch-track::after {
+  transform: translateX(16px);
+}
+
+.filter-switch input:focus-visible + .filter-switch-track {
+  box-shadow: 0 0 0 3px var(--brand-red-soft);
+}
+
+.filter-switch-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink);
 }
 
 .filter-chip {
@@ -407,7 +564,7 @@
 }
 
 .product-card-visual .product-card-media::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: rgba(5, 5, 5, 0);
@@ -1110,17 +1267,19 @@
   }
 
   .filter-panel.sheet-open {
-    display: block;
+    /* Flex column so .filter-panel-scroll is the single bounded scroller — the
+       head stays pinned and the groups scroll (no swallowed-gesture deadlock). */
+    display: flex;
+    flex-direction: column;
     position: fixed;
     inset: auto 0 0 0;
     top: auto;
     z-index: 90;
     border-radius: var(--radius-card) var(--radius-card) 0 0;
-    max-height: 78vh;
-    overflow-y: auto;
+    max-height: 82vh;
     animation: sheet-up 340ms var(--ease-out);
     box-shadow: var(--shadow-modal);
-    padding-bottom: 32px;
+    padding-bottom: 24px;
   }
 
   .catalog-filter-btn {
@@ -1154,6 +1313,10 @@
 }
 
 @media (max-width: 560px) {
+  .catalog-toolbar {
+    margin: 0 0 16px;
+  }
+
   .product-grid,
   .product-grid.grid-cols-4 {
     column-count: 1;

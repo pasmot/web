@@ -1,9 +1,17 @@
-import type { Category } from '../../lib/api';
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import type { Category, FacetOption, Facets } from '../../lib/api';
 import { filterOptions } from '../../data/categories';
 
 /**
- * All filters map to API query params — every change triggers a new request
- * (no client-side filtering). `kategori` holds a category slug or 'semua'.
+ * Filter state. Most fields map to an API query param — every change triggers a
+ * new request (no client-side filtering).
+ *
+ * - `kategori` holds a category slug or 'semua'.
+ * - `kondisi`/`harga`/`tahun`/`lokasi` are local buckets (no facet).
+ * - The taxonomy fields (`brand`, `tipeMotor`, `ccRange`, `orisinalitas`,
+ *   `sellerType`, `source`) hold a raw facet `value` or '' for "all" — sent to
+ *   the API verbatim.
  */
 export type CatalogFilters = {
   kategori: string;
@@ -11,6 +19,13 @@ export type CatalogFilters = {
   harga: string;
   tahun: string;
   lokasi: string;
+  brand: string;
+  tipeMotor: string;
+  ccRange: string;
+  orisinalitas: string;
+  sellerType: string;
+  source: string;
+  verified: boolean;
 };
 
 export const DEFAULT_FILTERS: CatalogFilters = {
@@ -19,16 +34,39 @@ export const DEFAULT_FILTERS: CatalogFilters = {
   harga: 'Semua',
   tahun: 'Semua',
   lokasi: 'Semua',
+  brand: '',
+  tipeMotor: '',
+  ccRange: '',
+  orisinalitas: '',
+  sellerType: '',
+  source: '',
+  verified: false,
 };
 
-type Option = { value: string; label: string };
+type Option = { value: string; label: string; count?: number };
 
 const toOptions = (values: readonly string[]): Option[] =>
   values.map((v) => ({ value: v, label: v }));
 
+/** Prepends a "Semua" (value '') option to a facet list; [] stays [] so the group hides. */
+const facetOptions = (facet: FacetOption[]): Option[] =>
+  facet.length
+    ? [{ value: '', label: 'Semua' }, ...facet.map((o) => ({ value: o.value, label: o.label, count: o.count }))]
+    : [];
+
+type ChipGroup = {
+  key: keyof CatalogFilters;
+  label: string;
+  options: Option[];
+  /** Whether the section starts expanded. */
+  defaultOpen: boolean;
+};
+
 type FilterPanelProps = {
   /** Categories from /api/v1/categories — drives the "Kategori" group. */
   categories: Category[];
+  /** Filter options from /api/v1/catalog/facets — drives the taxonomy groups. */
+  facets: Facets;
   filters: CatalogFilters;
   onChange: (filters: CatalogFilters) => void;
   sheetOpen?: boolean;
@@ -36,27 +74,43 @@ type FilterPanelProps = {
 
 export function FilterPanel({
   categories,
+  facets,
   filters,
   onChange,
   sheetOpen = false,
 }: FilterPanelProps) {
-  const groups: { key: keyof CatalogFilters; label: string; options: Option[] }[] = [
+  // Every chip group is collapsible. Primary groups start open; secondary
+  // taxonomy groups start collapsed to keep the panel scannable.
+  const groups: ChipGroup[] = [
     {
       key: 'kategori',
       label: 'Kategori',
+      defaultOpen: true,
       options: [
         { value: 'semua', label: 'Semua' },
         ...categories.map((c) => ({ value: c.slug, label: c.name })),
       ],
     },
-    { key: 'kondisi', label: 'Kondisi', options: toOptions(filterOptions.kondisi) },
-    { key: 'harga', label: 'Harga', options: toOptions(filterOptions.harga) },
-    { key: 'tahun', label: 'Tahun', options: toOptions(filterOptions.tahun) },
-    { key: 'lokasi', label: 'Lokasi', options: toOptions(filterOptions.lokasi) },
+    { key: 'brand', label: 'Merk', defaultOpen: true, options: facetOptions(facets.brand) },
+    { key: 'kondisi', label: 'Kondisi', defaultOpen: true, options: toOptions(filterOptions.kondisi) },
+    { key: 'harga', label: 'Harga', defaultOpen: true, options: toOptions(filterOptions.harga) },
+    { key: 'tipeMotor', label: 'Tipe Motor', defaultOpen: false, options: facetOptions(facets.tipe_motor) },
+    { key: 'ccRange', label: 'Kapasitas Mesin', defaultOpen: false, options: facetOptions(facets.cc_range) },
+    { key: 'orisinalitas', label: 'Orisinalitas', defaultOpen: false, options: facetOptions(facets.kondisi_orisinalitas) },
+    { key: 'tahun', label: 'Tahun', defaultOpen: false, options: toOptions(filterOptions.tahun) },
+    { key: 'lokasi', label: 'Lokasi', defaultOpen: false, options: toOptions(filterOptions.lokasi) },
+    { key: 'sellerType', label: 'Tipe Penjual', defaultOpen: false, options: facetOptions(facets.seller_type) },
   ];
 
-  const isDirty = groups.some(
-    ({ key }) => filters[key] !== DEFAULT_FILTERS[key],
+  const [open, setOpen] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(groups.map((g) => [g.key, g.defaultOpen])),
+  );
+
+  const toggle = (key: string) =>
+    setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const isDirty = (Object.keys(DEFAULT_FILTERS) as (keyof CatalogFilters)[]).some(
+    (key) => filters[key] !== DEFAULT_FILTERS[key],
   );
 
   return (
@@ -72,22 +126,59 @@ export function FilterPanel({
         </button>
       </div>
 
-      {groups.map(({ key, label, options }) => (
-        <div className="filter-group" key={key}>
-          <h4>{label}</h4>
-          <div className="filter-chips">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                className={`filter-chip ${filters[key] === option.value ? 'active' : ''}`}
-                onClick={() => onChange({ ...filters, [key]: option.value })}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+      <div className="filter-panel-scroll">
+        {groups
+          // Facet-driven groups render nothing until options load (or if the
+          // facets request failed) — keeps empty sections out of the panel.
+          .filter((g) => g.options.length > 0)
+          .map(({ key, label, options }) => {
+            const isOpen = open[key] ?? false;
+            const selected = filters[key];
+            return (
+              <div className={`filter-group ${isOpen ? 'open' : ''}`} key={key}>
+                <button
+                  type="button"
+                  className="filter-group-head"
+                  aria-expanded={isOpen}
+                  onClick={() => toggle(key)}
+                >
+                  <h4>{label}</h4>
+                  <ChevronDown size={16} className="filter-group-chevron" />
+                </button>
+                {isOpen && (
+                  <div className="filter-chips">
+                    {options.map((option) => (
+                      <button
+                        key={option.value || 'semua'}
+                        className={`filter-chip ${selected === option.value ? 'active' : ''}`}
+                        onClick={() => onChange({ ...filters, [key]: option.value })}
+                      >
+                        {option.label}
+                        {option.count != null && (
+                          <span className="filter-chip-count">{option.count}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+        <div className="filter-group filter-group-toggle">
+          <label className="filter-switch">
+            <input
+              type="checkbox"
+              checked={filters.verified}
+              onChange={(e) =>
+                onChange({ ...filters, verified: e.target.checked })
+              }
+            />
+            <span className="filter-switch-track" aria-hidden="true" />
+            <span className="filter-switch-label">Penjual terverifikasi</span>
+          </label>
         </div>
-      ))}
+      </div>
     </aside>
   );
 }

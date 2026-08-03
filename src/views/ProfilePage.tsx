@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { LogOut, Mail, PencilLine, Store } from 'lucide-react';
-import type { AuthUser } from '../hooks/useAuth';
-import { fetchMe, updateMe, type MeProfile } from '../lib/api';
-import { Button } from '../components/ui/Button';
-import { Modal } from '../components/ui/Modal';
-import { Badge } from '../components/ui/Badge';
+import { useEffect, useState } from "react";
+import { LogOut, Mail, PencilLine, Store } from "lucide-react";
+import type { AuthUser } from "../hooks/useAuth";
+import { fetchMe, updateMe, type MeProfile } from "../lib/api";
+import { Button } from "../components/ui/Button";
+import { Modal } from "../components/ui/Modal";
+import { Badge } from "../components/ui/Badge";
 
 type ProfilePageProps = {
   user: AuthUser;
@@ -16,9 +16,9 @@ type ProfilePageProps = {
 };
 
 const TIER_LABELS: Record<number, string> = {
-  1: 'Seller Pemula',
-  2: 'Seller Berkembang',
-  3: 'Kios Terverifikasi',
+  1: "Seller Pemula",
+  2: "Seller Berkembang",
+  3: "Kios Terverifikasi",
 };
 
 export function ProfilePage({
@@ -33,8 +33,8 @@ export function ProfilePage({
   const [profile, setProfile] = useState<MeProfile | null>(null);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editBio, setEditBio] = useState('');
+  const [editName, setEditName] = useState("");
+  const [editBio, setEditBio] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -60,8 +60,8 @@ export function ProfilePage({
   const seller = profile?.seller ?? null;
 
   const openEdit = () => {
-    setEditName(profile?.user.full_name ?? user.name ?? '');
-    setEditBio(profile?.user.bio ?? '');
+    setEditName(profile?.user.full_name ?? user.name ?? "");
+    setEditBio(profile?.user.bio ?? "");
     setEditOpen(true);
   };
 
@@ -74,9 +74,9 @@ export function ProfilePage({
       });
       setProfile(updated);
       setEditOpen(false);
-      onToast?.('Profil berhasil diperbarui');
+      onToast?.("Profil berhasil diperbarui");
     } catch {
-      onToast?.('Gagal memperbarui profil — coba lagi');
+      onToast?.("Gagal memperbarui profil — coba lagi");
     } finally {
       setSaving(false);
     }
@@ -97,7 +97,7 @@ export function ProfilePage({
                 className="profile-avatar"
                 src={avatarUrl}
                 alt={name}
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: "cover" }}
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -132,22 +132,22 @@ export function ProfilePage({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Badge tone="success">Member aktif</Badge>
             {joinYear && <Badge>Bergabung {joinYear}</Badge>}
             {seller && (
               <Badge tone="red">
                 <Store size={12} style={{ marginRight: 4 }} />
-                {TIER_LABELS[seller.tier ?? 1] ?? 'Seller'}
+                {TIER_LABELS[seller.tier ?? 1] ?? "Seller"}
               </Badge>
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-            <Button variant="outline" onClick={openEdit}>
+          <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+            {/* <Button variant="outline" onClick={openEdit}>
               <PencilLine size={16} />
               Edit profil
-            </Button>
+            </Button> */}
             <Button variant="soft" onClick={() => setConfirmOpen(true)}>
               <LogOut size={16} />
               Keluar
@@ -179,7 +179,7 @@ export function ProfilePage({
           </div>
           <div className="modal-actions" style={{ marginTop: 20 }}>
             <Button block onClick={saveEdit} disabled={saving}>
-              {saving ? 'Menyimpan…' : 'Simpan'}
+              {saving ? "Menyimpan…" : "Simpan"}
             </Button>
             <Button variant="ghost" block onClick={() => setEditOpen(false)}>
               Batal
@@ -188,12 +188,16 @@ export function ProfilePage({
         </div>
       </Modal>
 
-      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth={380}>
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        maxWidth={380}
+      >
         <div className="login-gate">
           <h2>Keluar dari akun?</h2>
           <p style={{ marginTop: 10 }}>
-            Fitur incaran, inspeksi, dan chat lanjutan akan kembali terkunci sampai
-            kamu login lagi.
+            Fitur incaran, inspeksi, dan chat lanjutan akan kembali terkunci
+            sampai kamu login lagi.
           </p>
           <div className="modal-actions" style={{ marginTop: 22 }}>
             <Button

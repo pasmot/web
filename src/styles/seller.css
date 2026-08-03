@@ -1,0 +1,408 @@
+/* ============================================================
+   Seller registration (/registrasi-seller)
+   ============================================================ */
+
+.seller-page {
+  background: var(--color-bg);
+  min-height: calc(100vh - var(--header-height));
+  padding: 40px 20px 96px;
+}
+
+.seller-shell {
+  max-width: 940px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 40px 44px 36px;
+}
+
+/* ---------- Header ---------- */
+
+.seller-head h1 {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.seller-head p {
+  margin-top: 8px;
+  font-size: 14.5px;
+  color: var(--color-muted);
+  max-width: 640px;
+}
+
+/* ---------- Sections ---------- */
+
+.seller-section {
+  border-top: 1px solid var(--color-border-soft);
+  margin-top: 28px;
+  padding-top: 26px;
+}
+
+.seller-section h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 18px;
+}
+
+.seller-grid {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.seller-grid.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.seller-grid.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---------- Fields ---------- */
+
+.seller-field {
+  margin-bottom: 18px;
+}
+
+.seller-grid .seller-field {
+  margin-bottom: 0;
+}
+
+/* Caption labels only — exclude the dropzone, which is itself a <label>. */
+.seller-field label:not(.seller-dropzone) {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.seller-field .req {
+  color: var(--brand-red);
+}
+
+.seller-field input,
+.seller-field textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  transition: box-shadow 160ms var(--ease-soft);
+  appearance: none;
+}
+
+.seller-field textarea {
+  resize: vertical;
+  min-height: 132px;
+  line-height: 1.55;
+}
+
+.seller-field input:focus,
+.seller-field textarea:focus {
+  box-shadow: inset 0 0 0 1.5px var(--brand-red);
+}
+
+.seller-field input::placeholder,
+.seller-field textarea::placeholder {
+  color: var(--color-faint);
+}
+
+.seller-field input[aria-invalid='true'],
+.seller-field textarea[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--brand-red);
+}
+
+.seller-err {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--brand-red);
+}
+
+/* Locked (Google-sourced) fields */
+.seller-locked {
+  position: relative;
+}
+
+.seller-locked input {
+  background: var(--color-surface-soft);
+  color: var(--color-muted);
+  box-shadow: inset 0 0 0 1px var(--color-border-soft);
+  padding-right: 40px;
+  cursor: not-allowed;
+}
+
+.seller-locked svg {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-faint);
+  pointer-events: none;
+}
+
+/* ---------- Logo dropzone ---------- */
+
+.seller-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  min-height: 132px;
+  height: 100%;
+  padding: 20px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease-soft),
+    background 160ms var(--ease-soft);
+}
+
+.seller-dropzone:hover,
+.seller-dropzone.drag {
+  border-color: var(--brand-red);
+  background: var(--brand-red-soft);
+}
+
+.seller-dropzone-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.seller-dropzone strong {
+  font-size: 13.5px;
+  color: var(--color-text);
+}
+
+.seller-dropzone small {
+  font-size: 12px;
+  color: var(--color-faint);
+}
+
+.seller-logo-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 132px;
+  height: 100%;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.seller-logo-preview img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.seller-logo-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.seller-logo-meta strong {
+  font-size: 13px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seller-logo-meta button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--brand-red);
+  cursor: pointer;
+  width: fit-content;
+}
+
+/* ---------- Actions ---------- */
+
+.seller-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+/* ---------- Alerts ---------- */
+
+.seller-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 20px 0 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--brand-red-soft);
+  color: var(--brand-red-deep);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.seller-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.seller-alert.info {
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
+.seller-inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Sign-in / state / result screens ---------- */
+
+.seller-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--color-muted);
+  padding: 48px 24px;
+}
+
+.seller-signin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 520px;
+  padding: 48px 44px 44px;
+}
+
+.seller-signin-icon,
+.seller-result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--brand-red-soft);
+  color: var(--brand-red);
+}
+
+.seller-signin h1,
+.seller-result h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.seller-signin p,
+.seller-result p {
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.55;
+  max-width: 460px;
+}
+
+.seller-gsi {
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.seller-result-icon.success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.seller-result-icon.info {
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
+.seller-result-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+  .seller-page {
+    padding: 20px 14px 72px;
+  }
+
+  .seller-shell {
+    padding: 28px 22px 28px;
+    border-radius: var(--radius-lg);
+  }
+
+  .seller-head h1 {
+    font-size: 24px;
+  }
+
+  .seller-grid.cols-2,
+  .seller-grid.cols-3 {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .seller-grid .seller-field {
+    margin-bottom: 0;
+  }
+
+  .seller-actions {
+    flex-direction: column-reverse;
+  }
+
+  .seller-actions .btn {
+    width: 100%;
+  }
+}

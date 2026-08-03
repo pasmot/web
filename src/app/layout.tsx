@@ -8,6 +8,7 @@ import '../styles/chat.css';
 import '../styles/modals.css';
 import '../styles/legal.css';
 import '../styles/help.css';
+import '../styles/seller.css';
 import { AppProvider } from '../context/AppContext';
 import { Shell } from '../components/layout/Shell';
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={inter.variable}>
+    <html lang="id" className={inter.variable} data-scroll-behavior="smooth">
       <body>
         <AppProvider>
           <Shell>{children}</Shell>

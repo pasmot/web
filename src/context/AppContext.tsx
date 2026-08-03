@@ -35,7 +35,8 @@ const FEATURE_NAMES: Record<string, string> = {
   'chat-continue': 'Chat Montir AI Lanjutan',
 };
 
-export type Toast = { id: number; text: string };
+export type ToastVariant = 'success' | 'error';
+export type Toast = { id: number; text: string; variant: ToastVariant };
 
 let toastCounter = 0;
 
@@ -98,14 +99,11 @@ type AppContextValue = {
   inspeksiFormProduct: Product | null;
   closeInspeksiForm: () => void;
   /**
-   * Submits the current inspeksiFormProduct to the API. Resolves with the
-   * authoritative fee; rejects with a user-facing message the form displays.
+   * Registers an inspection for the current inspeksiFormProduct. Scheduling and
+   * location are coordinated via WhatsApp afterwards, so no form data is needed.
+   * Resolves with the authoritative fee; rejects with a user-facing message.
    */
-  submitInspeksi: (data: {
-    scheduledDate: string;
-    meetingLocation: string;
-    notes: string;
-  }) => Promise<{ feeAmount: number }>;
+  submitInspeksi: () => Promise<{ feeAmount: number }>;
 
   // contact seller modal
   contactProduct: Product | null;
@@ -113,7 +111,7 @@ type AppContextValue = {
 
   // toasts
   toasts: Toast[];
-  pushToast: (text: string) => void;
+  pushToast: (text: string, variant?: ToastVariant) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -145,13 +143,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [dockExpanded, setDockExpandedState] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const pushToast = useCallback((text: string) => {
-    const id = ++toastCounter;
-    setToasts((prev) => [...prev, { id, text }]);
-    window.setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 2600);
-  }, []);
+  const pushToast = useCallback(
+    (text: string, variant: ToastVariant = 'success') => {
+      const id = ++toastCounter;
+      setToasts((prev) => [...prev, { id, text, variant }]);
+      window.setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 2600);
+    },
+    [],
+  );
 
   /* ---------- Bookmarks (server-backed wishlist) ---------- */
 
@@ -493,19 +494,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   /* ---------- Inspeksi / logout ---------- */
 
   const submitInspeksi = useCallback(
-    async (data: {
-      scheduledDate: string;
-      meetingLocation: string;
-      notes: string;
-    }): Promise<{ feeAmount: number }> => {
+    async (): Promise<{ feeAmount: number }> => {
       const product = inspeksiFormProduct;
       if (product?.internalId == null) {
         throw new Error('Unit ini tidak bisa diinspeksi. Buka listing dari Pasar.');
       }
+      // Jadwal & lokasi dikonfirmasi lewat WhatsApp, jadi kirim default aman.
       const payload: CreateInspectionPayload = {
-        scheduled_date: data.scheduledDate,
-        meeting_location: data.meetingLocation.trim(),
-        notes: data.notes.trim() || undefined,
+        scheduled_date: new Date().toISOString().slice(0, 10),
+        meeting_location: 'Dijadwalkan via WhatsApp',
       };
       const created = await createInspection(product.internalId, payload);
       // Refresh so the list reflects the new request (fire-and-forget).

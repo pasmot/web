@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { viewFromPathname } from '../../lib/routes';
 import { Header } from './Header';
@@ -17,6 +17,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const view = viewFromPathname(pathname);
   const isChat = view === 'chat';
+  // The catalog uses infinite scroll — a footer that keeps sliding out of reach
+  // as new pages load is jarring, so drop it there too.
+  const hideFooter = isChat || view === 'catalog';
 
   const app = useApp();
   const [atLandingHero, setAtLandingHero] = useState(true);
@@ -55,7 +58,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <main className="app-main">{children}</main>
 
-      {!isChat && <Footer onNavigate={app.smartNavigate} />}
+      {!hideFooter && <Footer onNavigate={app.smartNavigate} />}
 
       {!isChat && (
         <div
@@ -105,8 +108,12 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <div className="toast-wrap" aria-live="polite">
         {app.toasts.map((toast) => (
-          <div className="toast" key={toast.id}>
-            <CheckCircle2 size={16} />
+          <div className={`toast toast-${toast.variant}`} key={toast.id}>
+            {toast.variant === 'error' ? (
+              <AlertCircle size={16} />
+            ) : (
+              <CheckCircle2 size={16} />
+            )}
             {toast.text}
           </div>
         ))}

@@ -66,6 +66,9 @@ export function Footer({ onNavigate }: FooterProps) {
               <li>
                 <button onClick={() => onNavigate('saved')}>Incaran</button>
               </li>
+              <li>
+                <Link href="/registrasi-seller">Daftar Jadi Penjual</Link>
+              </li>
             </ul>
           </div>
 

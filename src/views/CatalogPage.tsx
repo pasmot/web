@@ -1,10 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Search, SearchX, SlidersHorizontal, WifiOff, X } from 'lucide-react';
-import type { Product } from '../types/product';
-import { searchSuggestions } from '../data/categories';
-import { useCategories } from '../hooks/useCategories';
-import { useCatalogListings } from '../hooks/useCatalogListings';
-import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { useEffect, useRef, useState } from "react";
+import {
+  Loader2,
+  Search,
+  SearchX,
+  SlidersHorizontal,
+  WifiOff,
+  X,
+} from "lucide-react";
+import type { Product } from "../types/product";
+import { useCategories } from "../hooks/useCategories";
+import { useFacets } from "../hooks/useFacets";
+import { useCatalogListings } from "../hooks/useCatalogListings";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import {
   conditionFor,
   DEFAULT_FILTERS,
@@ -12,10 +19,10 @@ import {
   priceRangeFor,
   yearRangeFor,
   type CatalogFilters,
-} from '../components/catalog/FilterPanel';
-import { ProductGrid } from '../components/catalog/ProductGrid';
-import { Button } from '../components/ui/Button';
-import { EmptyState } from '../components/ui/EmptyState';
+} from "../components/catalog/FilterPanel";
+import { ProductGrid } from "../components/catalog/ProductGrid";
+import { Button } from "../components/ui/Button";
+import { EmptyState } from "../components/ui/EmptyState";
 
 type CatalogPageProps = {
   savedIds: string[];
@@ -55,19 +62,13 @@ export function CatalogPage({
   const [filters, setFilters] = useState<CatalogFilters>(
     restored?.filters ?? {
       ...DEFAULT_FILTERS,
-      kategori: initialCategory ?? 'semua',
+      kategori: initialCategory ?? "semua",
     },
   );
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const { categories } = useCategories();
-  const categoryChips = useMemo(
-    () => [
-      { slug: 'semua', label: 'Semua' },
-      ...categories.map((c) => ({ slug: c.slug, label: c.name })),
-    ],
-    [categories],
-  );
+  const { facets } = useFacets();
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
@@ -89,26 +90,38 @@ export function CatalogPage({
     loadMore,
     reload,
   } = useCatalogListings({
-    categorySlug: filters.kategori === 'semua' ? null : filters.kategori,
+    categorySlug: filters.kategori === "semua" ? null : filters.kategori,
     condition: conditionFor(filters.kondisi),
     query: debouncedQuery,
     minPrice,
     maxPrice,
     yearMin,
     yearMax,
-    city: filters.lokasi === 'Semua' ? undefined : filters.lokasi,
+    city: filters.lokasi === "Semua" ? undefined : filters.lokasi,
+    brand: filters.brand || undefined,
+    tipeMotor: filters.tipeMotor || undefined,
+    ccRange: filters.ccRange || undefined,
+    kondisiOrisinalitas: filters.orisinalitas || undefined,
+    sellerType: filters.sellerType || undefined,
+    source: filters.source || undefined,
+    isVerified: filters.verified || undefined,
   });
 
-  // Auto-load the next page when the sentinel scrolls into view.
+  // Auto-load the next page when the sentinel scrolls into view. The prefetch
+  // distance must exceed the sticky filter panel's height (capped near one
+  // viewport) — otherwise the panel starts "riding up" against the grid's
+  // bottom before the next page arrives. Loading ~1.5 viewports early keeps the
+  // grid bottom off-screen, so the panel stays pinned during infinite scroll.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore || loading || error) return;
+    const prefetch = Math.max(900, Math.round(window.innerHeight * 1.5));
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) loadMore();
       },
-      { rootMargin: '600px' },
+      { rootMargin: `${prefetch}px` },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -117,7 +130,7 @@ export function CatalogPage({
   return (
     <div className="catalog-page">
       <div className="container">
-        <div className="catalog-head">
+        {/* <div className="catalog-head">
           <h1 className="catalog-title">Pasar</h1>
           <p className="catalog-sub">
             {loading
@@ -126,53 +139,48 @@ export function CatalogPage({
                 ? 'Gagal terhubung ke server'
                 : `${total.toLocaleString('id-ID')} produk terkurasi siap dibandingkan`}
           </p>
-        </div>
-
-        <div className="catalog-toolbar">
-          <div className="catalog-search">
-            <Search size={18} />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari motor, sparepart, aksesoris…"
-              aria-label="Cari produk"
-            />
-            {query && (
-              <button
-                className="icon-btn"
-                onClick={() => setQuery('')}
-                aria-label="Hapus pencarian"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-          <Button
-            variant="outline"
-            className="catalog-filter-btn"
-            onClick={() => setSheetOpen(true)}
-          >
-            <SlidersHorizontal size={16} />
-            Filter
-          </Button>
-        </div>
-
-        <div className="category-chip-row">
-          {categoryChips.map((chip) => (
-            <button
-              key={chip.slug}
-              className={`category-chip ${filters.kategori === chip.slug ? 'active' : ''}`}
-              onClick={() => setFilters({ ...filters, kategori: chip.slug })}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
+        </div> */}
 
         <div className="catalog-body">
-          <FilterPanel categories={categories} filters={filters} onChange={setFilters} />
+          <FilterPanel
+            categories={categories}
+            facets={facets}
+            filters={filters}
+            onChange={setFilters}
+          />
 
-          <div>
+          <div className="catalog-content">
+            {/* Search sits inside the content column so it lines up with the
+                grid and lets the filter panel rise to the same top row. */}
+            <div className="catalog-toolbar">
+              <div className="catalog-search">
+                <Search size={18} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Cari motor, sparepart, aksesoris…"
+                  aria-label="Cari produk"
+                />
+                {query && (
+                  <button
+                    className="icon-btn"
+                    onClick={() => setQuery("")}
+                    aria-label="Hapus pencarian"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                className="catalog-filter-btn"
+                onClick={() => setSheetOpen(true)}
+              >
+                <SlidersHorizontal size={16} />
+                Filter
+              </Button>
+            </div>
+
             {!loading && error ? (
               <EmptyState
                 icon={<WifiOff size={26} />}
@@ -193,7 +201,7 @@ export function CatalogPage({
                   <Button
                     variant="soft"
                     onClick={() => {
-                      setQuery('');
+                      setQuery("");
                       setFilters(DEFAULT_FILTERS);
                     }}
                   >
@@ -233,27 +241,6 @@ export function CatalogPage({
                 )}
               </>
             )}
-
-            {!loading && results.length > 0 && query.trim() === '' && (
-              <div
-                style={{
-                  marginTop: 28,
-                  display: 'flex',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>
-                  Sering dicari:
-                </span>
-                {searchSuggestions.map((s) => (
-                  <button key={s} className="chat-chip" onClick={() => setQuery(s)}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -267,6 +254,7 @@ export function CatalogPage({
           />
           <FilterPanel
             categories={categories}
+            facets={facets}
             filters={filters}
             onChange={setFilters}
             sheetOpen

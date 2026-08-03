@@ -592,6 +592,10 @@ a {
   color: #4ade80;
 }
 
+.toast-error svg {
+  color: #f87171;
+}
+
 /* ---------- Section primitives ---------- */
 
 .section {

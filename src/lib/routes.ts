@@ -16,6 +16,7 @@ export const INFO_PATHS = [
   '/hubungi-kami',
   '/kebijakan-privasi',
   '/syarat-ketentuan',
+  '/registrasi-seller',
 ] as const;
 
 export function productPath(id: string): string {
