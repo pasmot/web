@@ -71,6 +71,9 @@
 
 .seller-grid .seller-field {
   margin-bottom: 0;
+  /* Allow the column to shrink below its content so long text can truncate
+     instead of blowing out the grid track. */
+  min-width: 0;
 }
 
 /* Caption labels only — exclude the dropzone, which is itself a <label>. */
@@ -233,6 +236,7 @@
 .seller-logo-meta strong {
   font-size: 13px;
   color: var(--color-text);
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
