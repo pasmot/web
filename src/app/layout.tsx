@@ -18,15 +18,31 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pasarmotor.com';
+const siteTitle = 'PasarMotor — Beli, Jual & Cek Motor Lebih Yakin';
+const siteDescription =
+  'PasarMotor — marketplace motor yang bantu kamu beli, jual, dan cek kendaraan dengan lebih yakin.';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'PasarMotor — Beli, Jual & Cek Motor Lebih Yakin',
+    default: siteTitle,
     template: '%s · PasarMotor',
   },
-  description:
-    'PasarMotor — marketplace motor yang bantu kamu beli, jual, dan cek kendaraan dengan lebih yakin.',
-  icons: {
-    icon: '/brand/pasarmotor-logo.png',
+  description: siteDescription,
+  applicationName: 'PasarMotor',
+  openGraph: {
+    type: 'website',
+    siteName: 'PasarMotor',
+    locale: 'id_ID',
+    url: siteUrl,
+    title: siteTitle,
+    description: siteDescription,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteTitle,
+    description: siteDescription,
   },
 };
 
