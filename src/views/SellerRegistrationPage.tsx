@@ -63,6 +63,8 @@ export function SellerRegistrationPage() {
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  // Backend menerima logo sebagai opsional; frontend yang mewajibkannya.
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +94,7 @@ export function SellerRegistrationPage() {
       return;
     }
     setError(null);
+    setLogoError(null);
     setLogo(file);
     setLogoPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -130,8 +133,12 @@ export function SellerRegistrationPage() {
     if (form.olxUrl.trim() && !looksLikeUrl(form.olxUrl))
       next.olxUrl = 'Tautan tidak valid (contoh: https://olx.co.id/toko-anda).';
     setFieldErrors(next);
-    return Object.keys(next).length === 0;
-  }, [form]);
+
+    const logoMissing = !logo;
+    setLogoError(logoMissing ? 'Logo / foto kios wajib diunggah.' : null);
+
+    return Object.keys(next).length === 0 && !logoMissing;
+  }, [form, logo]);
 
   /** Fallback ketika email sudah terdaftar: OAuth Google penuh, balik ke sini. */
   const goToGoogleLogin = useCallback(() => {
@@ -355,7 +362,9 @@ export function SellerRegistrationPage() {
               />
             </div>
             <div className="seller-field">
-              <label>Logo / Ikon</label>
+              <label>
+                Logo / Ikon <span className="req">*</span>
+              </label>
               {logoPreview ? (
                 <div className="seller-logo-preview">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -369,7 +378,9 @@ export function SellerRegistrationPage() {
                 </div>
               ) : (
                 <label
-                  className={`seller-dropzone ${dragOver ? 'drag' : ''}`}
+                  className={`seller-dropzone ${dragOver ? 'drag' : ''} ${
+                    logoError ? 'error' : ''
+                  }`}
                   onDragOver={(e) => {
                     e.preventDefault();
                     setDragOver(true);
@@ -394,6 +405,7 @@ export function SellerRegistrationPage() {
                   />
                 </label>
               )}
+              {logoError && <small className="seller-err">{logoError}</small>}
             </div>
           </div>
         </section>

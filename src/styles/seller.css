@@ -182,6 +182,12 @@
   background: var(--brand-red-soft);
 }
 
+/* Ditandai saat submit ditolak karena logo belum diunggah. */
+.seller-dropzone.error {
+  border-color: var(--brand-red);
+  border-style: solid;
+}
+
 .seller-dropzone-icon {
   display: inline-flex;
   align-items: center;
