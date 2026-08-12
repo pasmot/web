@@ -129,9 +129,38 @@ Berdasarkan Pasal 5 sampai Pasal 15 UU No. 27 Tahun 2022 tentang Pelindungan Dat
 8. **Menuntut dan menerima ganti rugi** atas pelanggaran pemrosesan Data Pribadi kamu.
 9. **Memindahkan (portabilitas)** Data Pribadi kamu ke Pengendali Data Pribadi lain, sepanjang sistemnya saling sesuai.
 
-## Cara Mengajukan Permohonan
+## Menghapus Akun Sendiri
 
-Kirim permohonan ke **${COMPANY.emailPrivacy}** dengan subjek "Permohonan Hak Subjek Data — [jenis permohonan]", atau hubungi PasarMotor Care di ${COMPANY.phoneDisplay}.
+Untuk menghapus akun beserta data pribadimu, kamu tidak perlu menghubungi kami. Buka aplikasi Pasar Motor, lalu:
+
+**Profil → Edit Profil → Hapus akun & data pribadi**
+
+Ketik kata **HAPUS** untuk konfirmasi, lalu tekan "Hapus akun saya". Penghapusan berlaku seketika, tanpa masa tenggang, dan tidak dapat dibatalkan.
+
+Kalau kamu masih punya saldo atau penarikan dana yang sedang diproses, penghapusan ditahan sampai dana itu kamu cairkan — supaya uangmu tidak hangus tanpa jejak yang bisa diklaim.
+
+### Yang dihapus
+
+Nama, alamat email, identitas akun Google, foto profil, biodata, nomor telepon, dan alamat kamu. Nama, deskripsi, logo, dan tautan toko pada kiosmu. Seluruh daftar Incaran, serta lokasi pertemuan dan catatan pada permintaan inspeksi. Semua iklanmu diturunkan dari katalog.
+
+### Yang tetap disimpan, dan berapa lama
+
+Catatan berikut wajib kami simpan menurut ketentuan pembukuan dan perpajakan, dan **tidak lagi terhubung dengan identitasmu**:
+
+| Jenis Data | Jangka Waktu Penyimpanan |
+| --- | --- |
+| Data akun (identitas, kontak, profil) | 10 tahun setelah penutupan akun |
+| Data transaksi dan pembayaran | 1 tahun sejak Transaksi Selesai |
+| Data verifikasi identitas (KTP/NPWP/swafoto) | 1 tahun sejak akun ditutup |
+| Data iklan Unit | 12 bulan sejak iklan diturunkan atau Unit terjual |
+| Data Catatan (log) dan Data Teknis | 12 bulan |
+| Data komunikasi Pusat Resolusi | 12 tahun sejak kendala selesai |
+
+Rincian lengkapnya ada pada Bagian G Kebijakan Privasi.
+
+## Cara Mengajukan Permohonan Lain
+
+Untuk hak selain penghapusan akun — akses, perbaikan, penarikan persetujuan, keberatan, pembatasan, atau portabilitas — kirim permohonan ke **${COMPANY.emailPrivacy}** dengan subjek "Permohonan Hak Subjek Data — [jenis permohonan]", atau hubungi PasarMotor Care di ${COMPANY.phoneDisplay}.
 
 Agar dapat kami proses, sertakan:
 
@@ -146,7 +175,8 @@ Kami memverifikasi identitas kamu terlebih dahulu, lalu menanggapi permohonan **
 
 ## Hal yang Perlu Kamu Ketahui
 
-- **Penghapusan akun tidak menghapus seluruh data.** Data transaksi dan data verifikasi identitas tetap kami simpan selama jangka waktu pada Bagian G Kebijakan Privasi, karena kewajiban hukum perpajakan dan anti pencucian uang.
+- **Penghapusan akun tidak menghapus seluruh data.** Catatan keuangan tetap kami simpan sesuai tabel di atas, karena kewajiban hukum perpajakan dan anti pencucian uang, tetapi sudah tidak terhubung dengan identitasmu.
+- **Masuk lagi dengan akun Google yang sama tidak memulihkan akun lama.** Yang terbentuk adalah akun baru yang kosong.
 - **Menarik persetujuan dapat menghentikan sebagian atau seluruh Layanan**, hingga penutupan akun. Kami akan memberi tahu konsekuensinya sebelum permohonan diproses.
 - **Kami dapat menolak sebagian permohonan** sepanjang diizinkan peraturan perundang-undangan — misalnya bila membahayakan keamanan negara, mengganggu penegakan hukum, atau bertentangan dengan kewajiban penyimpanan data. Alasan penolakan disampaikan secara tertulis.
 

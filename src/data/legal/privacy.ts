@@ -180,6 +180,18 @@ Kami menyimpan Data Pribadi Anda hanya selama diperlukan untuk memenuhi tujuan p
 
 Setelah jangka waktu tersebut berakhir dan tidak terdapat kewajiban hukum untuk menyimpan lebih lanjut, Kami akan **menghapus atau menganonimkan** Data Pribadi Anda.
 
+### Penghapusan Akun
+
+Anda dapat menghapus akun secara permanen kapan saja, langsung dari dalam aplikasi Pasar Motor melalui **Profil → Edit Profil → Hapus akun & data pribadi**. Anda tidak perlu menghubungi Kami terlebih dahulu, dan tidak ada masa tenggang — penghapusan berlaku seketika.
+
+Yang dihapus atau dianonimkan: nama, alamat email, identitas akun Google, foto profil, biodata, nomor telepon, alamat, serta nama, deskripsi, logo, dan tautan toko pada kios Anda. Seluruh iklan Anda diturunkan dari katalog, etalase kios, dan halaman detail. Seluruh daftar Incaran, beserta lokasi pertemuan dan catatan pada permintaan inspeksi, ikut dihapus.
+
+Catatan keuangan yang wajib Kami simpan menurut ketentuan pembukuan dan perpajakan — riwayat pesanan, buku besar saldo, riwayat penarikan dana, dan baris permintaan inspeksi yang montirnya telah dikirim dan biayanya telah ditagih — tetap tersimpan selama jangka waktu pada tabel di atas, **namun tidak lagi terhubung dengan identitas Anda**.
+
+Penghapusan akun tidak dapat dibatalkan. Apabila di kemudian hari Anda masuk kembali menggunakan akun Google yang sama, yang terbentuk adalah akun baru yang kosong, bukan pemulihan akun lama.
+
+Apabila Anda masih memiliki saldo atau penarikan dana yang belum selesai, permohonan penghapusan akan ditahan sampai dana tersebut Anda cairkan. Ini untuk mencegah dana Anda hangus tanpa jejak yang dapat diklaim.
+
 Perlu Anda perhatikan bahwa sebagian Data Pribadi Anda dapat tetap tersimpan pada pihak lain, termasuk instansi pemerintah, Mitra Pembiayaan, dan jasa pengiriman, sesuai kebijakan penyimpanan masing-masing pihak tersebut.
 
 ## H. Hak Anda sebagai Subjek Data Pribadi
