@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Product } from '../../../types/product';
 import { getProduct, products } from '../../../data/products';
 import { fetchListing } from '../../../lib/api';
+import { listingImagePath } from '../../../lib/listingImage';
 import { ProductBinding } from '../../../views/bindings/ProductBinding';
 
 type Params = { id: string };
@@ -13,13 +14,29 @@ export function generateStaticParams(): Params[] {
   return products.map((p) => ({ id: p.id }));
 }
 
+/**
+ * Points the gallery at /api/img instead of the API's own photo URLs.
+ *
+ * Those are presigned and expire after an hour, which this page's cached HTML
+ * routinely outlives — the symptom being a gallery of "Gambar tidak tersedia"
+ * placeholders until someone reloads. The indirection never expires, so the
+ * HTML stays cacheable and each photo is signed when it is actually requested.
+ */
+function withStableImages(product: Product): Product {
+  if (product.gallery.length === 0) return product;
+  const gallery = product.gallery.map((_, i) => listingImagePath(product.id, i));
+  return { ...product, image: gallery[0], gallery };
+}
+
 // Resolve a product by id: prefer the curated mock data, then fall back to the
 // live public catalog. cache() dedupes the lookup across metadata + page render.
+// Mock photos are ordinary static URLs, so only API listings need rewriting.
 const resolveProduct = cache(async (id: string): Promise<Product | null> => {
   const mock = getProduct(id);
   if (mock) return mock;
   try {
-    return await fetchListing(id, { next: { revalidate: 300 } });
+    const listing = await fetchListing(id, { next: { revalidate: 300 } });
+    return listing && withStableImages(listing);
   } catch {
     return null;
   }
