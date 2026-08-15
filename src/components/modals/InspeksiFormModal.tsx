@@ -4,6 +4,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { INSPEKSI_FEE, formatRupiah } from '../../data/inspeksi';
 import { buildWhatsAppUrl } from '../../lib/contact';
+import { productUrl } from '../../lib/routes';
 import type { Product } from '../../types/product';
 
 type InspeksiFormModalProps = {
@@ -94,9 +95,10 @@ export function InspeksiFormModal({
   const detail = [product.location, product.year, product.mileage]
     .filter(Boolean)
     .join(' · ');
-  const message = `Halo PasarMotor, saya ingin mengajukan jasa inspeksi montir untuk unit ${product.title}${
+  const link = productUrl(product.id);
+  const message = `Halo PASARMOTOR, saya ingin mengajukan jasa inspeksi montir untuk unit ${product.title}${
     product.location ? ` di ${product.location}` : ''
-  }. Mohon info jadwal dan lokasi inspeksinya. Terima kasih.`;
+  }. Mohon info jadwal dan lokasi inspeksinya. Terima kasih.\n\n${link}`;
   const waUrl = buildWhatsAppUrl(message);
 
   // Register the inspection (adds it to the user's list) while WhatsApp opens in

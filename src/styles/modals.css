@@ -347,6 +347,8 @@
   line-height: 1.6;
   color: var(--color-text);
   margin-bottom: 20px;
+  white-space: pre-line;
+  overflow-wrap: break-word;
 }
 
 .btn-wa {

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   CreditCard,
@@ -9,34 +9,34 @@ import {
   MessageCircle,
   ShieldCheck,
   Ticket,
-} from 'lucide-react';
-import { FAQ_TOPICS } from '../data/help/faq';
-import { COMPANY } from '../data/company';
+} from "lucide-react";
+import { FAQ_TOPICS } from "../data/help/faq";
+import { COMPANY } from "../data/company";
 
 const GUIDES = [
   {
-    href: '/bantuan/rekening-resmi',
+    href: "/bantuan/rekening-resmi",
     icon: Landmark,
-    title: 'Rekening Escrow Resmi',
-    desc: 'Cara memastikan kamu transfer ke rekening yang benar — dan ciri penipuan.',
+    title: "Rekening Escrow Resmi",
+    desc: "Cara memastikan kamu transfer ke rekening yang benar — dan ciri penipuan.",
   },
   {
-    href: '/bantuan/biaya-layanan',
+    href: "/bantuan/biaya-layanan",
     icon: CreditCard,
-    title: 'Biaya Layanan',
-    desc: 'Rincian biaya jual-beli, apa yang gratis, dan apa yang di luar tanggungan kami.',
+    title: "Biaya Layanan",
+    desc: "Rincian biaya jual-beli, apa yang gratis, dan apa yang di luar tanggungan kami.",
   },
   {
-    href: '/bantuan/kebijakan-tanda-jadi',
+    href: "/bantuan/kebijakan-tanda-jadi",
     icon: Ticket,
-    title: 'Kebijakan Tanda Jadi',
-    desc: 'Aturan booking fee: kapan dikembalikan penuh dan kapan bisa hangus.',
+    title: "Kebijakan Tanda Jadi",
+    desc: "Aturan booking fee: kapan dikembalikan penuh dan kapan bisa hangus.",
   },
   {
-    href: '/bantuan/hak-data-pribadi',
+    href: "/bantuan/hak-data-pribadi",
     icon: ShieldCheck,
-    title: 'Hak atas Data Pribadi',
-    desc: 'Cara mengajukan akses, perbaikan, atau penghapusan data kamu.',
+    title: "Hak atas Data Pribadi",
+    desc: "Cara mengajukan akses, perbaikan, atau penghapusan data kamu.",
   },
 ];
 
@@ -49,14 +49,19 @@ export function HelpCenterPage() {
         <header className="help-head">
           <h1>Pusat Bantuan</h1>
           <p>
-            Jawaban singkat untuk pertanyaan yang paling sering muncul soal jual-beli
-            motor di PasarMotor. Tidak ketemu? Tim PasarMotor Care siap bantu.
+            Jawaban singkat untuk pertanyaan yang paling sering muncul soal
+            jual-beli motor di PASARMOTOR. Tidak ketemu? Tim PasarMotor Care
+            siap bantu.
           </p>
         </header>
 
         <section className="help-guides" aria-label="Panduan penting">
           {GUIDES.map((guide) => (
-            <Link key={guide.href} href={guide.href} className="help-guide-card">
+            <Link
+              key={guide.href}
+              href={guide.href}
+              className="help-guide-card"
+            >
               <span className="help-guide-icon">
                 <guide.icon size={18} />
               </span>
@@ -78,7 +83,10 @@ export function HelpCenterPage() {
                     const id = `${topic.id}-${index}`;
                     const open = openId === id;
                     return (
-                      <li key={id} className={`help-faq-item ${open ? 'open' : ''}`}>
+                      <li
+                        key={id}
+                        className={`help-faq-item ${open ? "open" : ""}`}
+                      >
                         <button
                           type="button"
                           aria-expanded={open}
@@ -103,8 +111,8 @@ export function HelpCenterPage() {
               </span>
               <h2>Masih butuh bantuan?</h2>
               <p>
-                Hubungi PasarMotor Care — {COMPANY.supportHours}. Kami tidak pernah
-                meminta kata sandi, kode OTP, atau data kartu pembayaran.
+                Hubungi PasarMotor Care — {COMPANY.supportHours}. Kami tidak
+                pernah meminta kata sandi, kode OTP, atau data kartu pembayaran.
               </p>
               <Link className="btn btn-primary btn-block" href="/hubungi-kami">
                 Hubungi Kami

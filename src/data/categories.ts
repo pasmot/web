@@ -12,19 +12,26 @@ export const FALLBACK_CATEGORIES: Category[] = [
 
 /**
  * Local presentation for the landing-page category cards, keyed by API slug —
- * the API only provides id/name/slug.
+ * the API only provides id/name/slug. `name` overrides the (longer) backend
+ * name shown on the card.
  */
-export const CATEGORY_META: Record<string, { description: string; image: string }> = {
+export const CATEGORY_META: Record<
+  string,
+  { name: string; description: string; image: string }
+> = {
   motor: {
+    name: 'Motor',
     description: 'Motor baru & bekas terkurasi',
     image:
       'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80',
   },
   'spare-part-motor': {
+    name: 'Sparepart',
     description: 'Part original & aftermarket',
     image: '/sparepart.png',
   },
   'aksesoris-motor': {
+    name: 'Aksesoris',
     description: 'Helm, jaket & gear riding',
     image:
       'https://images.unsplash.com/photo-1627530980937-b8721b91506a?auto=format&fit=crop&w=900&q=80',
@@ -37,15 +44,17 @@ const DEFAULT_CATEGORY_META = {
     'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80',
 };
 
-export const categoryMeta = (slug: string) =>
-  CATEGORY_META[slug] ?? DEFAULT_CATEGORY_META;
+export const categoryMeta = (slug: string, fallbackName: string) => {
+  const meta = CATEGORY_META[slug];
+  return meta ?? { name: fallbackName, ...DEFAULT_CATEGORY_META };
+};
 
 /**
- * Preferred order for the landing-page category cards (spare part first),
- * independent of the order the API returns categories in. Unlisted slugs
- * keep their original order and fall after the listed ones.
+ * Preferred order for the landing-page category cards — Sparepart, Motor,
+ * Aksesoris — independent of the order the API returns categories in.
+ * Unlisted slugs keep their original order and fall after the listed ones.
  */
-const CATEGORY_CARD_ORDER = ['spare-part-motor', 'aksesoris-motor', 'motor'];
+const CATEGORY_CARD_ORDER = ['spare-part-motor', 'motor', 'aksesoris-motor'];
 
 export const categoryCardRank = (slug: string) => {
   const i = CATEGORY_CARD_ORDER.indexOf(slug);

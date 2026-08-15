@@ -6,7 +6,7 @@ import { COMPANY } from '../data/company';
 import { buildWhatsAppUrl } from '../lib/contact';
 
 const WA_MESSAGE =
-  'Halo PasarMotor Care, saya butuh bantuan terkait akun/transaksi saya.';
+  'Halo PASARMOTOR Care, saya butuh bantuan terkait akun/transaksi saya.';
 
 export function ContactPage() {
   return (
@@ -16,7 +16,7 @@ export function ContactPage() {
           <h1>Hubungi Kami</h1>
           <p>
             Ada kendala transaksi, pertanyaan soal akun, atau menemukan hal yang
-            mencurigakan? Tim PasarMotor Care siap membantu.
+            mencurigakan? Tim PASARMOTOR Care siap membantu.
           </p>
         </header>
 
@@ -30,7 +30,7 @@ export function ContactPage() {
             <span className="contact-icon wa">
               <MessageCircle size={20} />
             </span>
-            <strong>WhatsApp PasarMotor Care</strong>
+            <strong>WhatsApp PASARMOTOR Care</strong>
             <span className="contact-value">{COMPANY.phoneDisplay}</span>
             <span className="contact-note">Jalur tercepat untuk kendala transaksi.</span>
           </a>
@@ -75,7 +75,7 @@ export function ContactPage() {
             <AlertTriangle size={18} />
           </span>
           <div>
-            <h2>Waspada penipuan mengatasnamakan PasarMotor</h2>
+            <h2>Waspada penipuan mengatasnamakan PASARMOTOR</h2>
             <p>
               Kami <strong>tidak pernah</strong> meminta kata sandi, kode OTP, PIN, atau
               data kartu pembayaran melalui saluran apa pun. Kami juga tidak pernah

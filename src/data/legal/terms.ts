@@ -6,7 +6,7 @@
  * dan sengaja tidak ditampilkan di halaman publik.
  */
 
-export const TERMS_LAST_UPDATED = '23 Juli 2026';
+export const TERMS_LAST_UPDATED = "23 Juli 2026";
 
 export const TERMS_ID = `
 ## Ketentuan Bahasa / Language
@@ -17,7 +17,7 @@ These Terms are made in Indonesian and English. In the event of any inconsistenc
 
 ## Pembukaan
 
-Selamat datang di Pasar Motor.
+Selamat datang di PASARMOTOR.
 
 Syarat dan Ketentuan ini merupakan perjanjian antara Pengguna ("Anda") dengan **PT PASAR MOTOR INDONESIA** ("Pasar Motor" atau "Kami"), yang mengatur hak, kewajiban, dan tanggung jawab Pengguna atas penggunaan layanan yang diakses melalui situs **www.pasarmotor.com** beserta seluruh situs turunannya dan/atau aplikasi berbasis Android maupun iOS yang Kami kelola ("Situs/Aplikasi").
 

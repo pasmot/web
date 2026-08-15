@@ -3,9 +3,9 @@
  * Privasi. Isinya wajib konsisten dengan kedua dokumen tersebut.
  */
 
-import { COMPANY } from '../company';
+import { COMPANY } from "../company";
 
-export const HELP_DOCS_LAST_UPDATED = '23 Juli 2026';
+export const HELP_DOCS_LAST_UPDATED = "23 Juli 2026";
 
 export const BIAYA_LAYANAN = `
 ## Ringkasan Biaya
@@ -52,7 +52,7 @@ Ketentuan lengkap ada pada Bagian J Syarat & Ketentuan.
 export const REKENING_RESMI = `
 ## Kenapa Halaman Ini Penting
 
-Seluruh pembayaran transaksi di PasarMotor **hanya sah apabila dilakukan ke Rekening Escrow Resmi PasarMotor**. Dana ditahan di rekening tersebut sampai Transaksi Selesai, baru diteruskan ke Penjual.
+Seluruh pembayaran transaksi di PASARMOTOR **hanya sah apabila dilakukan ke Rekening Escrow Resmi PasarMotor**. Dana ditahan di rekening tersebut sampai Transaksi Selesai, baru diteruskan ke Penjual.
 
 **Pembayaran ke rekening lain — termasuk rekening pribadi Penjual — sepenuhnya menjadi tanggung jawab pribadi kamu dan tidak mendapat perlindungan apa pun dari PasarMotor.** Pusat Resolusi juga tidak berlaku untuk transaksi di luar escrow.
 

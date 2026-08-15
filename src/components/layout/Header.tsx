@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Bookmark, Menu, X } from 'lucide-react';
-import type { AppView } from '../../types/app';
-import { Button } from '../ui/Button';
+import { useState } from "react";
+import { Bookmark, Menu, X } from "lucide-react";
+import type { AppView } from "../../types/app";
+import { Button } from "../ui/Button";
 
-const navLogo = '/pm-logo-horizontal.svg';
+const navLogo = "/pm-logo-horizontal.svg";
 
 type HeaderProps = {
   activeView: AppView;
@@ -17,15 +17,15 @@ type HeaderProps = {
 };
 
 const PUBLIC_NAV: { view: AppView; label: string }[] = [
-  { view: 'catalog', label: 'Pasar' },
-  { view: 'chat', label: 'Montir AI' },
+  { view: "catalog", label: "Jelajah" },
+  { view: "chat", label: "Montir AI" },
 ];
 
 const MEMBER_NAV: { view: AppView; label: string }[] = [
-  { view: 'landing', label: 'Beranda' },
-  { view: 'catalog', label: 'Pasar' },
-  { view: 'chat', label: 'Montir AI' },
-  { view: 'inspeksi', label: 'Inspeksi' },
+  { view: "landing", label: "Beranda" },
+  { view: "catalog", label: "Jelajah" },
+  { view: "chat", label: "Montir AI" },
+  { view: "inspeksi", label: "Inspeksi" },
 ];
 
 export function Header({
@@ -50,7 +50,7 @@ export function Header({
   return (
     <header className="site-header">
       <div className="container site-header-inner">
-        <button className="header-logo" onClick={() => navigate('landing')}>
+        <button className="header-logo" onClick={() => navigate("landing")}>
           <img src={navLogo} alt="PasarMotor" />
         </button>
 
@@ -58,7 +58,7 @@ export function Header({
           {navItems.map((item) => (
             <button
               key={item.view}
-              className={`header-nav-link ${activeView === item.view ? 'active' : ''}`}
+              className={`header-nav-link ${activeView === item.view ? "active" : ""}`}
               onClick={() => navigate(item.view)}
             >
               {item.label}
@@ -115,7 +115,7 @@ export function Header({
           {navItems.map((item) => (
             <button
               key={item.view}
-              className={`header-nav-link ${activeView === item.view ? 'active' : ''}`}
+              className={`header-nav-link ${activeView === item.view ? "active" : ""}`}
               onClick={() => navigate(item.view)}
             >
               {item.label}

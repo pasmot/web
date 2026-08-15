@@ -108,14 +108,13 @@ export function LandingPage({
         <div className="container">
           <div className="hero-copy">
             <h1 className="hero-title">
-              Beli, jual & cek motor dengan
+              Sparepart, Motor, Aksesoris
               <br />
-              <em>lebih yakin.</em>
+              Beli & Jual <em>lebih yakin.</em>
             </h1>
             <p className="hero-sub">
-              Temukan motor, aksesoris, sparepart baru dan bekas dari seller
-              terkurasi. Tanya Montir AI, untuk tahu lebih banyak tentang
-              produk.
+              Tanyakan Montir AI untuk temukan motor, aksesoris, sparepart baru
+              dan bekas dari seller terkurasi.
             </p>
             <div className="hero-ctas">
               <Button size="lg" onClick={() => onExploreCatalog()}>
@@ -154,25 +153,25 @@ export function LandingPage({
                 (a, b) => categoryCardRank(a.slug) - categoryCardRank(b.slug),
               )
               .map((cat) => {
-              const meta = categoryMeta(cat.slug);
-              return (
-                <button
-                  key={cat.slug}
-                  className="category-card"
-                  onClick={() => onExploreCatalog(cat.slug)}
-                >
-                  <img src={meta.image} alt="" />
-                  <span className="category-card-body">
-                    <h3>{cat.name}</h3>
-                    <p>{meta.description}</p>
-                    <span>
-                      Jelajahi {cat.name}
-                      <ArrowRight size={14} />
+                const meta = categoryMeta(cat.slug, cat.name);
+                return (
+                  <button
+                    key={cat.slug}
+                    className="category-card"
+                    onClick={() => onExploreCatalog(cat.slug)}
+                  >
+                    <img src={meta.image} alt="" />
+                    <span className="category-card-body">
+                      <h3>{meta.name}</h3>
+                      <p>{meta.description}</p>
+                      <span>
+                        Jelajahi {meta.name}
+                        <ArrowRight size={14} />
+                      </span>
                     </span>
-                  </span>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
           </div>
         </div>
       </section>
@@ -281,6 +280,7 @@ export function LandingPage({
                 Begitu siap bertransaksi, semua kemampuan penuh PasarMotor
                 menunggu di Apps.
               </p>
+              <StoreBadges />
             </div>
 
             <div className="app-feature-grid">
@@ -307,7 +307,7 @@ export function LandingPage({
       </section>
 
       {/* ---------- Final CTA ---------- */}
-      <section className="section" style={{ paddingTop: 8 }}>
+      {/* <section className="section" style={{ paddingTop: 8 }}>
         <div className="container">
           <div className="final-cta">
             <h2>
@@ -326,7 +326,7 @@ export function LandingPage({
             <StoreBadges />
           </div>
         </div>
-      </section>
+      </section> */}
     </>
   );
 }

@@ -60,7 +60,13 @@ type ChipGroup = {
   options: Option[];
   /** Whether the section starts expanded. */
   defaultOpen: boolean;
+  /** Only meaningful for motor listings — hidden once a non-motor category is picked. */
+  motorOnly?: boolean;
 };
+
+/** Category filter values for which motor-only groups (tahun, cc, dst.) should hide. */
+const isNonMotorCategory = (kategori: string) =>
+  kategori !== 'semua' && kategori !== 'motor';
 
 type FilterPanelProps = {
   /** Categories from /api/v1/categories — drives the "Kategori" group. */
@@ -94,10 +100,10 @@ export function FilterPanel({
     { key: 'brand', label: 'Merk', defaultOpen: true, options: facetOptions(facets.brand) },
     { key: 'kondisi', label: 'Kondisi', defaultOpen: true, options: toOptions(filterOptions.kondisi) },
     { key: 'harga', label: 'Harga', defaultOpen: true, options: toOptions(filterOptions.harga) },
-    { key: 'tipeMotor', label: 'Tipe Motor', defaultOpen: false, options: facetOptions(facets.tipe_motor) },
-    { key: 'ccRange', label: 'Kapasitas Mesin', defaultOpen: false, options: facetOptions(facets.cc_range) },
-    { key: 'orisinalitas', label: 'Orisinalitas', defaultOpen: false, options: facetOptions(facets.kondisi_orisinalitas) },
-    { key: 'tahun', label: 'Tahun', defaultOpen: false, options: toOptions(filterOptions.tahun) },
+    { key: 'tipeMotor', label: 'Tipe Motor', defaultOpen: false, options: facetOptions(facets.tipe_motor), motorOnly: true },
+    { key: 'ccRange', label: 'Kapasitas Mesin', defaultOpen: false, options: facetOptions(facets.cc_range), motorOnly: true },
+    { key: 'orisinalitas', label: 'Orisinalitas', defaultOpen: false, options: facetOptions(facets.kondisi_orisinalitas), motorOnly: true },
+    { key: 'tahun', label: 'Tahun', defaultOpen: false, options: toOptions(filterOptions.tahun), motorOnly: true },
     { key: 'lokasi', label: 'Lokasi', defaultOpen: false, options: toOptions(filterOptions.lokasi) },
     { key: 'sellerType', label: 'Tipe Penjual', defaultOpen: false, options: facetOptions(facets.seller_type) },
   ];
@@ -112,6 +118,22 @@ export function FilterPanel({
   const isDirty = (Object.keys(DEFAULT_FILTERS) as (keyof CatalogFilters)[]).some(
     (key) => filters[key] !== DEFAULT_FILTERS[key],
   );
+
+  const nonMotorCategory = isNonMotorCategory(filters.kategori);
+
+  // Selecting a sparepart/aksesoris category hides the motor-only groups above —
+  // also clear their values so a stale tahun/cc/dst. pick doesn't keep silently
+  // narrowing results after the section disappears.
+  const changeFilter = (key: keyof CatalogFilters, value: string) => {
+    const next = { ...filters, [key]: value };
+    if (key === 'kategori' && isNonMotorCategory(value)) {
+      next.tipeMotor = DEFAULT_FILTERS.tipeMotor;
+      next.ccRange = DEFAULT_FILTERS.ccRange;
+      next.orisinalitas = DEFAULT_FILTERS.orisinalitas;
+      next.tahun = DEFAULT_FILTERS.tahun;
+    }
+    onChange(next);
+  };
 
   return (
     <aside className={`filter-panel ${sheetOpen ? 'sheet-open' : ''}`}>
@@ -130,7 +152,9 @@ export function FilterPanel({
         {groups
           // Facet-driven groups render nothing until options load (or if the
           // facets request failed) — keeps empty sections out of the panel.
-          .filter((g) => g.options.length > 0)
+          // Motor-only groups (tahun, cc, dst.) also hide once a sparepart/
+          // aksesoris category is selected, since those fields don't apply.
+          .filter((g) => g.options.length > 0 && !(g.motorOnly && nonMotorCategory))
           .map(({ key, label, options }) => {
             const isOpen = open[key] ?? false;
             const selected = filters[key];
@@ -151,7 +175,7 @@ export function FilterPanel({
                       <button
                         key={option.value || 'semua'}
                         className={`filter-chip ${selected === option.value ? 'active' : ''}`}
-                        onClick={() => onChange({ ...filters, [key]: option.value })}
+                        onClick={() => changeFilter(key, option.value)}
                       >
                         {option.label}
                         {option.count != null && (

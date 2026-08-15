@@ -23,6 +23,12 @@ export function productPath(id: string): string {
   return `/produk/${id}`;
 }
 
+/** Full, absolute URL to a product detail page (for sharing outside the app, e.g. WhatsApp). */
+export function productUrl(id: string): string {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pasarmotor.com';
+  return `${siteUrl}${productPath(id)}`;
+}
+
 export function dealerPath(id: string): string {
   return `/dealer/${id}`;
 }

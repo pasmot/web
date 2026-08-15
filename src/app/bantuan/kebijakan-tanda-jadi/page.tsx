@@ -1,14 +1,14 @@
-import type { Metadata } from 'next';
-import { LegalPage } from '../../../views/LegalPage';
+import type { Metadata } from "next";
+import { LegalPage } from "../../../views/LegalPage";
 import {
   HELP_DOCS_LAST_UPDATED,
   KEBIJAKAN_TANDA_JADI,
-} from '../../../data/help/documents';
+} from "../../../data/help/documents";
 
 export const metadata: Metadata = {
-  title: 'Kebijakan Tanda Jadi',
+  title: "Kebijakan Tanda Jadi",
   description:
-    'Aturan tanda jadi (booking fee) di PasarMotor: alur pembayaran, kapan dikembalikan penuh, dan kapan dapat hangus.',
+    "Aturan tanda jadi (booking fee) di PASARMOTOR: alur pembayaran, kapan dikembalikan penuh, dan kapan dapat hangus.",
 };
 
 export default function Page() {

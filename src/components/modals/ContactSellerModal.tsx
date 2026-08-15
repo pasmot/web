@@ -1,9 +1,10 @@
-import { MessageCircle } from 'lucide-react';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import type { Product } from '../../types/product';
-import { getDealer } from '../../data/dealers';
-import { buildWhatsAppUrl } from '../../lib/contact';
+import { MessageCircle } from "lucide-react";
+import { Modal } from "../ui/Modal";
+import { Button } from "../ui/Button";
+import type { Product } from "../../types/product";
+import { getDealer } from "../../data/dealers";
+import { buildWhatsAppUrl } from "../../lib/contact";
+import { productUrl } from "../../lib/routes";
 
 type ContactSellerModalProps = {
   open: boolean;
@@ -11,11 +12,19 @@ type ContactSellerModalProps = {
   onClose: () => void;
 };
 
-export function ContactSellerModal({ open, product, onClose }: ContactSellerModalProps) {
+export function ContactSellerModal({
+  open,
+  product,
+  onClose,
+}: ContactSellerModalProps) {
   if (!product) return null;
 
   const dealer = getDealer(product.seller);
-  const message = `Halo ${dealer?.name ?? 'Penjual'}, saya tertarik dengan ${product.title} yang Anda jual di Pasar Motor. Apakah unit masih tersedia dan bisa dijadwalkan inspeksi?`;
+  const isMotor = product.category === "motor";
+  const link = productUrl(product.id);
+  const message = isMotor
+    ? `Halo ${dealer?.name ?? "Penjual"}, saya tertarik dengan ${product.title} yang Anda jual di PASARMOTOR. Apakah unit masih tersedia dan bisa dijadwalkan inspeksi?\n\n${link}`
+    : `Halo ${dealer?.name ?? "Penjual"}, saya tertarik dengan ${product.title} yang Anda jual di PASARMOTOR. Apakah barang masih tersedia?\n\n${link}`;
   const waUrl = buildWhatsAppUrl(message);
 
   return (
@@ -24,12 +33,12 @@ export function ContactSellerModal({ open, product, onClose }: ContactSellerModa
         <h2>Hubungi Penjual</h2>
 
         <div className="wa-modal-seller">
-          <div className="pdp-dealer-avatar">{dealer?.initials ?? 'PM'}</div>
+          <div className="pdp-dealer-avatar">{dealer?.initials ?? "PM"}</div>
           <div>
-            <strong>{dealer?.name ?? 'Penjual PasarMotor'}</strong>
+            <strong>{dealer?.name ?? "Penjual PASARMOTOR"}</strong>
             <small>
               <span className="wa-online-dot" />
-              Online di WhatsApp · {dealer?.responseTime ?? 'Balas ±5 menit'}
+              Online di WhatsApp · {dealer?.responseTime ?? "Balas ±5 menit"}
             </small>
           </div>
         </div>
