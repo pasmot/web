@@ -97,7 +97,7 @@ export function FilterPanel({
         ...categories.map((c) => ({ value: c.slug, label: c.name })),
       ],
     },
-    { key: 'brand', label: 'Merk', defaultOpen: true, options: facetOptions(facets.brand) },
+    { key: 'brand', label: 'Merk', defaultOpen: true, options: facetOptions(facets.brand), motorOnly: true },
     { key: 'kondisi', label: 'Kondisi', defaultOpen: true, options: toOptions(filterOptions.kondisi) },
     { key: 'harga', label: 'Harga', defaultOpen: true, options: toOptions(filterOptions.harga) },
     { key: 'tipeMotor', label: 'Tipe Motor', defaultOpen: false, options: facetOptions(facets.tipe_motor), motorOnly: true },
@@ -127,6 +127,7 @@ export function FilterPanel({
   const changeFilter = (key: keyof CatalogFilters, value: string) => {
     const next = { ...filters, [key]: value };
     if (key === 'kategori' && isNonMotorCategory(value)) {
+      next.brand = DEFAULT_FILTERS.brand;
       next.tipeMotor = DEFAULT_FILTERS.tipeMotor;
       next.ccRange = DEFAULT_FILTERS.ccRange;
       next.orisinalitas = DEFAULT_FILTERS.orisinalitas;
