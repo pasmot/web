@@ -14,6 +14,32 @@ export const montirIntro = {
     "Halo! Aku Montir AI. Ceritakan kebutuhanmu — budget, pemakaian harian atau touring — nanti aku bantu carikan unit yang cocok dan kasih saran sebelum kamu nego.",
 };
 
+/** Empty-state copy + starter questions shown when the chat has no context yet. */
+export const montirStarters = {
+  headline: "Montir AI bantu cari yang cocok, bukan sekadar mencari",
+  subhead:
+    "Tanya soal kecocokan part, bandingkan pilihan, atau minta rekomendasi sesuai budget dan pemakaian.",
+  label: "Coba mulai dari sini",
+  questions: [
+    {
+      text: "Kampas rem Mio Gear yang cocok part number berapa?",
+      category: "Kecocokan part",
+    },
+    {
+      text: "Bandingin Vespa matic bekas di bawah 30 juta",
+      category: "Komparasi",
+    },
+    {
+      text: "Filter udara Beat letaknya di mana?",
+      category: "Penjelasan teknis",
+    },
+    {
+      text: "Part 1LB-F530K-00 muat di motor apa aja?",
+      category: "Reverse lookup",
+    },
+  ],
+};
+
 export const generalSuggestions = [
   "Rekomendasikan motor matic 30 jutaan",
   "Motor bekas irit untuk harian",

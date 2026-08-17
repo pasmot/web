@@ -27,6 +27,10 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
     inputRef.current?.focus();
   };
 
+  // Fresh thread with no product context: the empty state carries the starters,
+  // so the chip row would only repeat them.
+  const showStarters = chat.messages.length === 0 && !chat.contextProduct;
+
   // Prefer the AI's own follow-up questions; fall back to static suggestions.
   const chips =
     chat.followUps.length > 0
@@ -74,6 +78,7 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
             messages={chat.messages}
             isTyping={chat.isTyping}
             onOpenProduct={onOpenProduct}
+            onStarterSelect={showStarters ? send : undefined}
           />
           {chat.error && (
             <div className="chat-error">
@@ -104,7 +109,7 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
             </div>
           ) : (
             <>
-              {!chat.isTyping && (
+              {!chat.isTyping && !showStarters && (
                 <div className="chat-chips">
                   {chips.map((chip) => (
                     <button key={chip} className="chat-chip" onClick={() => send(chip)}>

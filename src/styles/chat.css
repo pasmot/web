@@ -860,6 +860,77 @@
   line-height: 1.6;
 }
 
+.chat-starters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 8px;
+}
+
+.chat-starters-label {
+  font-size: 12.5px;
+  color: var(--color-muted);
+}
+
+.chat-starters-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 620px;
+}
+
+.chat-starter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: var(--radius-md, 14px);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), 0 4px 10px rgba(5, 5, 5, 0.04);
+  transition-property: box-shadow, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-soft);
+}
+
+.chat-starter strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.chat-starter small {
+  font-size: 11.5px;
+  color: var(--color-muted);
+}
+
+.chat-starter:hover {
+  box-shadow: inset 0 0 0 1px var(--brand-red), 0 6px 14px rgba(225, 6, 19, 0.1);
+  transform: translateY(-1px);
+}
+
+.chat-starter:hover strong {
+  color: var(--brand-red);
+}
+
+/* Dock panel is narrow — stack the cards instead of squeezing two columns. */
+.montir-dock .chat-starters-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.montir-dock .chat-starters {
+  padding: 12px 14px 6px;
+}
+
+@media (max-width: 560px) {
+  .chat-starters-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .chat-chips {
   display: flex;
   flex-wrap: wrap;

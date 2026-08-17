@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 import type { ChatMessage } from '../../types/chat';
 import type { Product } from '../../types/product';
-import { montirIntro } from '../../data/chatMocks';
+import { montirIntro, montirStarters } from '../../data/chatMocks';
 import { ProductImage } from '../ui/ProductImage';
 
 // Lazily loaded so react-markdown is fetched only when an AI answer renders —
@@ -20,6 +20,8 @@ type ChatThreadProps = {
   isTyping: boolean;
   onOpenProduct: (product: Product) => void;
   showWelcome?: boolean;
+  /** When set, the empty state offers starter questions that send on click. */
+  onStarterSelect?: (question: string) => void;
 };
 
 export function ChatThread({
@@ -27,8 +29,10 @@ export function ChatThread({
   isTyping,
   onOpenProduct,
   showWelcome = true,
+  onStarterSelect,
 }: ChatThreadProps) {
   const endRef = useRef<HTMLDivElement>(null);
+  const showStarters = Boolean(onStarterSelect) && messages.length === 0;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -39,8 +43,27 @@ export function ChatThread({
       {showWelcome && messages.length === 0 && (
         <div className="chat-welcome">
           <img src="/brand/montir-ai-logo.png" alt="Montir AI" />
-          <h3>{montirIntro.name}</h3>
-          <p>{montirIntro.welcome}</p>
+          <h3>{showStarters ? montirStarters.headline : montirIntro.name}</h3>
+          <p>{showStarters ? montirStarters.subhead : montirIntro.welcome}</p>
+        </div>
+      )}
+
+      {showStarters && (
+        <div className="chat-starters">
+          <span className="chat-starters-label">{montirStarters.label}</span>
+          <div className="chat-starters-grid">
+            {montirStarters.questions.map((item) => (
+              <button
+                key={item.text}
+                type="button"
+                className="chat-starter"
+                onClick={() => onStarterSelect?.(item.text)}
+              >
+                <strong>{item.text}</strong>
+                <small>{item.category}</small>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

@@ -68,6 +68,9 @@ export function MontirDock({
 
   const showQuota = !isLoggedIn && chat.remainingFree <= 2;
   const isMini = !expanded && mode === 'mini';
+  // Fresh thread with no product context: the empty state carries the starters,
+  // so the chip row would only repeat them.
+  const showStarters = chat.messages.length === 0 && !chat.contextProduct;
 
   return (
     <div className={`montir-dock ${expanded ? 'expanded' : mode}`}>
@@ -142,6 +145,7 @@ export function MontirDock({
                 messages={chat.messages}
                 isTyping={chat.isTyping}
                 onOpenProduct={onOpenProduct}
+                onStarterSelect={showStarters ? send : undefined}
               />
               {chat.error && (
                 <div className="chat-error">
@@ -159,7 +163,7 @@ export function MontirDock({
               )}
             </div>
 
-            {!chat.isTyping && !chat.limitReached && (
+            {!chat.isTyping && !chat.limitReached && !showStarters && (
               <div className="chat-chips">
                 {chips.map((chip) => (
                   <button key={chip} className="chat-chip" onClick={() => send(chip)}>
