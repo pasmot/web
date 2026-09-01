@@ -3,7 +3,7 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import type { Product } from "../../types/product";
 import { getDealer } from "../../data/dealers";
-import { buildWhatsAppUrl } from "../../lib/contact";
+import { buildWhatsAppUrl, sellerWhatsAppNumber } from "../../lib/contact";
 import { productUrl } from "../../lib/routes";
 
 type ContactSellerModalProps = {
@@ -25,7 +25,10 @@ export function ContactSellerModal({
   const message = isMotor
     ? `Halo ${dealer?.name ?? "Penjual"}, saya tertarik dengan ${product.title} yang Anda jual di PASARMOTOR. Apakah unit masih tersedia dan bisa dijadwalkan inspeksi?\n\n${link}`
     : `Halo ${dealer?.name ?? "Penjual"}, saya tertarik dengan ${product.title} yang Anda jual di PASARMOTOR. Apakah barang masih tersedia?\n\n${link}`;
-  const waUrl = buildWhatsAppUrl(message);
+  // Chat diarahkan ke nomor penjual kalau datanya ada; kalau belum ada,
+  // fallback ke nomor resmi PASARMOTOR.
+  const waNumber = sellerWhatsAppNumber(product.sellerPhone, dealer?.whatsapp);
+  const waUrl = buildWhatsAppUrl(message, waNumber);
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={420}>
@@ -50,9 +53,6 @@ export function ContactSellerModal({
             <small>Produk yang ditanyakan</small>
           </div>
         </div>
-
-        <div className="wa-message-label">Pesan yang akan dikirim:</div>
-        <div className="wa-message-preview">{message}</div>
 
         <div className="modal-actions">
           <a href={waUrl} target="_blank" rel="noreferrer">

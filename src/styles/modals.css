@@ -332,25 +332,6 @@
   display: inline-block;
 }
 
-.wa-message-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-muted);
-  margin-bottom: 7px;
-}
-
-.wa-message-preview {
-  background: var(--color-bg);
-  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 5px;
-  padding: 13px 15px;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--color-text);
-  margin-bottom: 20px;
-  white-space: pre-line;
-  overflow-wrap: break-word;
-}
-
 .btn-wa {
   background: #25d366;
   color: #fff;

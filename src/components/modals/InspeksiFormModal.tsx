@@ -136,9 +136,6 @@ export function InspeksiFormModal({
           </div>
         </div>
 
-        <div className="wa-message-label">Pesan yang akan dikirim:</div>
-        <div className="wa-message-preview">{message}</div>
-
         {error && (
           <div className="chat-error" style={{ marginTop: 12 }}>
             <AlertCircle size={13} />

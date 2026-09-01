@@ -76,7 +76,7 @@ const VALUE_PROPS = [
   },
   {
     icon: Bot,
-    title: "AI-assisted buying",
+    title: "Montir AI",
     desc: "Montir AI bantu rekomendasi, cek risiko, dan bandingkan unit — dari riset awal sampai keputusan akhir.",
   },
 ];
@@ -108,17 +108,17 @@ export function LandingPage({
         <div className="container">
           <div className="hero-copy">
             <h1 className="hero-title">
-              Sparepart, Motor, Aksesoris
+              Motor, Sparepart, Aksesoris.
               <br />
               Beli & Jual <em>lebih yakin.</em>
             </h1>
             <p className="hero-sub">
-              Tanyakan Montir AI untuk temukan motor, aksesoris, sparepart baru
-              dan bekas dari seller terkurasi.
+              Temukan motor, aksesoris, dan sparepart baru maupun bekas dari
+              seller terverifikasi dengan rekomendasi cerdas dari Montir AI.
             </p>
             <div className="hero-ctas">
               <Button size="lg" onClick={() => onExploreCatalog()}>
-                Jelajah Pasar
+                Jelajah
                 <ArrowRight size={18} />
               </Button>
             </div>

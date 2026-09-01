@@ -21,5 +21,5 @@ export const COMPANY = {
    * "segera hadir" dan tidak bisa diklik — isi begitu aplikasi terbit.
    */
   appStoreUrl: '',
-  playStoreUrl: '',
+  playStoreUrl: 'https://play.google.com/store/apps/details?id=com.pasarmotor.app',
 } as const;

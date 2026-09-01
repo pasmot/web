@@ -13,6 +13,7 @@ import { useFacets } from "../hooks/useFacets";
 import { useCatalogListings } from "../hooks/useCatalogListings";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import {
+  activeFilterCount,
   conditionFor,
   DEFAULT_FILTERS,
   FilterPanel,
@@ -66,6 +67,10 @@ export function CatalogPage({
     },
   );
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Badge on the mobile filter button — the panel itself is hidden there, so the
+  // count is the only cue that results are already narrowed.
+  const activeCount = activeFilterCount(filters);
 
   const { categories } = useCategories();
   const { facets } = useFacets();
@@ -173,11 +178,21 @@ export function CatalogPage({
               </div>
               <Button
                 variant="outline"
-                className="catalog-filter-btn"
+                className={`catalog-filter-btn ${activeCount > 0 ? "has-active" : ""}`}
                 onClick={() => setSheetOpen(true)}
+                aria-label={
+                  activeCount > 0
+                    ? `Filter, ${activeCount} filter aktif`
+                    : "Filter"
+                }
               >
                 <SlidersHorizontal size={16} />
                 Filter
+                {activeCount > 0 && (
+                  <span className="catalog-filter-count" aria-hidden="true">
+                    {activeCount}
+                  </span>
+                )}
               </Button>
             </div>
 

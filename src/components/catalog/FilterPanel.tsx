@@ -43,6 +43,13 @@ export const DEFAULT_FILTERS: CatalogFilters = {
   verified: false,
 };
 
+/** How many filters deviate from the defaults — drives the mobile button badge. */
+export function activeFilterCount(filters: CatalogFilters): number {
+  return (Object.keys(DEFAULT_FILTERS) as (keyof CatalogFilters)[]).filter(
+    (key) => filters[key] !== DEFAULT_FILTERS[key],
+  ).length;
+}
+
 type Option = { value: string; label: string; count?: number };
 
 const toOptions = (values: readonly string[]): Option[] =>
@@ -115,9 +122,7 @@ export function FilterPanel({
   const toggle = (key: string) =>
     setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const isDirty = (Object.keys(DEFAULT_FILTERS) as (keyof CatalogFilters)[]).some(
-    (key) => filters[key] !== DEFAULT_FILTERS[key],
-  );
+  const isDirty = activeFilterCount(filters) > 0;
 
   const nonMotorCategory = isNonMotorCategory(filters.kategori);
 

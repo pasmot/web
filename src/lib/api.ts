@@ -53,6 +53,9 @@ export type ApiListing = {
   primary_image_url?: string | null;
   seller_name?: string | null;
   seller_city?: string | null;
+  /** Belum tentu dikirim backend — dipakai kalau ada. */
+  seller_phone?: string | null;
+  seller_whatsapp?: string | null;
 };
 
 type ApiListingDetail = {
@@ -71,6 +74,9 @@ type ApiListingDetail = {
     name?: string | null;
     city?: string | null;
     province?: string | null;
+    /** Belum tentu dikirim backend — dipakai kalau ada. */
+    phone?: string | null;
+    whatsapp?: string | null;
   } | null;
 };
 
@@ -243,6 +249,8 @@ export function mapListing(raw: ApiListing): Product {
     year: '',
     mileage: '',
     seller: raw.seller_name?.trim() || `seller-${raw.seller_id}`,
+    sellerPhone:
+      raw.seller_whatsapp?.trim() || raw.seller_phone?.trim() || undefined,
   };
 }
 
@@ -308,6 +316,8 @@ function mapDetail(detail: ApiListingDetail): Product {
     gallery: gallery.length ? gallery : base.gallery,
     description: listing.description?.trim() || undefined,
     seller: seller?.name?.trim() || base.seller,
+    sellerPhone:
+      seller?.whatsapp?.trim() || seller?.phone?.trim() || base.sellerPhone,
     rating: Number.isFinite(rating) && rating > 0 ? rating : undefined,
     year: year ? String(year) : base.year,
     location: locationOf(listing.city, listing.province, seller?.city),

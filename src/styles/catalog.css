@@ -84,6 +84,31 @@
   min-height: 48px;
 }
 
+/* With filters applied the button reads as "on" — the panel is hidden on
+   mobile, so the button is the only place that state can show. */
+.catalog-filter-btn.has-active {
+  color: var(--brand-red);
+  background: var(--brand-red-soft);
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 6, 19, 0.35),
+    0 1px 2px rgba(5, 5, 5, 0.04);
+}
+
+.catalog-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-red);
+  color: var(--brand-white);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .category-chip {
   padding: 9px 18px;
   border-radius: var(--radius-pill);
