@@ -30,6 +30,10 @@ export function ProductCard({
   uniform = false,
 }: ProductCardProps) {
   const heights = visual ? VISUAL_HEIGHTS : MEDIA_HEIGHTS;
+  // Kota + nama toko, dipisah titik tengah; salah satunya boleh kosong.
+  const originLine = [product.city || product.location, product.sellerName]
+    .filter(Boolean)
+    .join(' \u00b7 ');
   const mediaHeight = uniform
     ? UNIFORM_HEIGHT
     : product.category === 'motor'
@@ -56,6 +60,9 @@ export function ProductCard({
           <span className="product-card-caption">
             <span className="product-card-caption-title">{product.title}</span>
             <span className="product-card-caption-price">{product.price}</span>
+            {originLine && (
+              <span className="product-card-caption-meta">{originLine}</span>
+            )}
           </span>
         </button>
         <button
@@ -108,9 +115,10 @@ export function ProductCard({
         <div className="product-card-meta">
           <span>
             <MapPin size={12} />
-            {product.location}
+            {product.city || product.location}
           </span>
           {/* Row (landing) cards show location only, per design */}
+          {!uniform && product.sellerName && <span>{product.sellerName}</span>}
           {!uniform && product.year && <span>{product.year}</span>}
           {!uniform && product.mileage && <span>{product.mileage}</span>}
           {!uniform && product.rating && (

@@ -244,11 +244,13 @@ export function mapListing(raw: ApiListing): Product {
     tag: tagFor(category, raw.condition),
     category,
     location: locationOf(raw.city, raw.province, raw.seller_city),
+    city: raw.city?.trim() || raw.seller_city?.trim() || undefined,
     // The scraped catalog has no structured year / mileage — left blank so the
     // UI degrades gracefully (catalog cards are image-only anyway).
     year: '',
     mileage: '',
     seller: raw.seller_name?.trim() || `seller-${raw.seller_id}`,
+    sellerName: raw.seller_name?.trim() || undefined,
     sellerPhone:
       raw.seller_whatsapp?.trim() || raw.seller_phone?.trim() || undefined,
   };
@@ -287,9 +289,11 @@ export function mapRecommendation(rec: ChatRecommendation): Product {
     tag: tagFor(category, rec.condition ?? ''),
     category,
     location: rec.city?.trim() || 'Indonesia',
+    city: rec.city?.trim() || undefined,
     year: '',
     mileage: '',
     seller: rec.seller_name?.trim() || 'PasarMotor',
+    sellerName: rec.seller_name?.trim() || undefined,
   };
 }
 
@@ -316,11 +320,13 @@ function mapDetail(detail: ApiListingDetail): Product {
     gallery: gallery.length ? gallery : base.gallery,
     description: listing.description?.trim() || undefined,
     seller: seller?.name?.trim() || base.seller,
+    sellerName: seller?.name?.trim() || base.sellerName,
     sellerPhone:
       seller?.whatsapp?.trim() || seller?.phone?.trim() || base.sellerPhone,
     rating: Number.isFinite(rating) && rating > 0 ? rating : undefined,
     year: year ? String(year) : base.year,
     location: locationOf(listing.city, listing.province, seller?.city),
+    city: listing.city?.trim() || seller?.city?.trim() || base.city,
   };
 }
 

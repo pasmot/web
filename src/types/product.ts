@@ -24,6 +24,8 @@ export type Product = {
   tag: ProductTag;
   category: ProductCategory;
   location: string;
+  /** Kota listing saja (tanpa provinsi), untuk baris meta di kartu. */
+  city?: string;
   year: string;
   /** Mileage for motors, spec meta for parts/accessories */
   mileage: string;
@@ -31,6 +33,11 @@ export type Product = {
   rating?: number;
   /** Dealer id */
   seller: string;
+  /**
+   * Nama toko/penjual untuk ditampilkan. Beda dengan `seller` yang dipakai
+   * sebagai id dealer — di sini kosong kalau API tidak mengirim `seller_name`.
+   */
+  sellerName?: string;
   /**
    * Nomor WhatsApp/HP penjual (kalau datanya ada). Dipakai sebagai tujuan chat;
    * kalau kosong, chat diarahkan ke nomor resmi PASARMOTOR.

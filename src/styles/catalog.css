@@ -638,6 +638,18 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
+/* Kota · nama toko — satu baris, dipotong kalau kepanjangan */
+.product-card-caption-meta {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
 @media (max-width: 560px) {
   .product-card-caption {
     padding: 24px 10px 10px;
@@ -649,6 +661,10 @@
 
   .product-card-caption-price {
     font-size: 13px;
+  }
+
+  .product-card-caption-meta {
+    font-size: 10px;
   }
 }
 
