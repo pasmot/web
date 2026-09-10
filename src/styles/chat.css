@@ -202,9 +202,9 @@
 }
 
 .montir-mini img {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
   outline: none;
   position: relative;
   z-index: 1;
@@ -309,13 +309,20 @@
 }
 
 .montir-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
-  object-fit: cover;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
   outline: none;
-  background: var(--brand-black);
   flex-shrink: 0;
+}
+
+/* Ikon sparkle merah: identitas Montir AI di dalam percakapan, sama seperti
+   MontirAvatar di aplikasi. */
+.montir-logo-spark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-red);
 }
 
 .montir-dock-head strong {
@@ -840,11 +847,12 @@
   gap: 8px;
 }
 
-.chat-welcome img {
-  width: 52px;
+.chat-welcome-spark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 52px;
-  border-radius: 16px;
-  outline: none;
+  color: var(--brand-red);
   margin-bottom: 4px;
 }
 
@@ -1058,11 +1066,14 @@
   gap: 12px;
 }
 
-.chat-page-head-inner img {
+.chat-page-head-spark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 13px;
-  outline: none;
+  flex-shrink: 0;
+  color: var(--brand-red);
 }
 
 .chat-page-head-inner strong {

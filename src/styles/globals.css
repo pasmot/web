@@ -453,22 +453,13 @@ a {
 .footer-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #fff;
-  font-weight: 800;
-  font-size: 17px;
 }
 
 .footer-brand img {
-  width: 40px;
-  height: 40px;
+  width: auto;
+  height: 36px;
   object-fit: contain;
   outline: none;
-}
-
-.footer-brand span em {
-  font-style: normal;
-  color: var(--brand-red);
 }
 
 .footer-desc {

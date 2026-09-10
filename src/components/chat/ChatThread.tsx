@@ -42,7 +42,9 @@ export function ChatThread({
     <>
       {showWelcome && messages.length === 0 && (
         <div className="chat-welcome">
-          <img src="/brand/montir-ai-logo.png" alt="Montir AI" />
+          <span className="chat-welcome-spark" aria-label="Montir AI" role="img">
+            <Sparkles size={34} />
+          </span>
           <h3>{showStarters ? montirStarters.headline : montirIntro.name}</h3>
           <p>{showStarters ? montirStarters.subhead : montirIntro.welcome}</p>
         </div>

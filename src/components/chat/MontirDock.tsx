@@ -83,7 +83,7 @@ export function MontirDock({
         tabIndex={isMini ? 0 : -1}
         aria-hidden={!isMini}
       >
-        <img src="/brand/montir-ai-logo.png" alt="" />
+        <img src="/brand/montir-robot.png" alt="" />
       </button>
 
       {/* Full content layer (bar + expanded panel) */}
@@ -93,7 +93,15 @@ export function MontirDock({
           onClick={expanded ? undefined : () => onExpandChange(true)}
           role={expanded ? undefined : 'button'}
         >
-          <img className="montir-logo" src="/brand/montir-ai-logo.png" alt="" />
+          {/* Sama seperti app: maskot robot jadi pintu masuk, ikon sparkle
+              merah jadi identitas Montir AI di dalam percakapan. */}
+          {expanded ? (
+            <span className="montir-logo montir-logo-spark">
+              <Sparkles size={22} />
+            </span>
+          ) : (
+            <img className="montir-logo" src="/brand/montir-robot.png" alt="" />
+          )}
           <div>
             <strong>{montirIntro.name}</strong>
             {expanded && <small>{montirIntro.tagline}</small>}

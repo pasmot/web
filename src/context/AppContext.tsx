@@ -11,7 +11,6 @@ import {
 import type { ReactNode } from 'react';
 import type { AppView, PendingAction } from '../types/app';
 import type { Product } from '../types/product';
-import { getProduct } from '../data/products';
 import {
   createInspection,
   fetchMyBookmarks,
@@ -31,7 +30,6 @@ const FEATURE_NAMES: Record<string, string> = {
   profile: 'Profil & Akun',
   inspeksi: 'Jasa Inspeksi',
   'inspeksi-view': 'Jasa Inspeksi',
-  'contact-seller': 'Chat WhatsApp Penjual',
   'chat-continue': 'Chat Montir AI Lanjutan',
 };
 
@@ -79,7 +77,6 @@ type AppContextValue = {
   // tier-2 (gated) actions
   toggleSave: (product: Product) => void;
   requestInspeksi: (product: Product | null) => void;
-  contactSeller: (product: Product) => void;
   openSaved: () => void;
   openProfile: () => void;
   requireLogin: (action: NonNullable<PendingAction>) => void;
@@ -104,10 +101,6 @@ type AppContextValue = {
    * Resolves with the authoritative fee; rejects with a user-facing message.
    */
   submitInspeksi: () => Promise<{ feeAmount: number }>;
-
-  // contact seller modal
-  contactProduct: Product | null;
-  closeContact: () => void;
 
   // toasts
   toasts: Toast[];
@@ -138,7 +131,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [inspeksiFormOpen, setInspeksiFormOpen] = useState(false);
   const [inspeksiFormProduct, setInspeksiFormProduct] = useState<Product | null>(null);
-  const [contactProduct, setContactProduct] = useState<Product | null>(null);
 
   const [dockExpanded, setDockExpandedState] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -348,11 +340,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setInspeksiFormOpen(true);
           break;
         }
-        case 'contact-seller': {
-          const product = getProduct(action.productId);
-          if (product) setContactProduct(product);
-          break;
-        }
         case 'chat-continue':
           chat.sendMessage(action.message);
           break;
@@ -444,17 +431,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [isLoggedIn, requireLogin],
   );
 
-  const contactSeller = useCallback(
-    (product: Product) => {
-      if (!isLoggedIn) {
-        requireLogin({ kind: 'contact-seller', productId: product.id });
-        return;
-      }
-      setContactProduct(product);
-    },
-    [isLoggedIn, requireLogin],
-  );
-
   const smartNavigate = useCallback(
     (next: AppView) => {
       if (next === 'saved') return openSaved();
@@ -541,7 +517,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openFullChat,
     toggleSave,
     requestInspeksi,
-    contactSeller,
     openSaved,
     openProfile,
     requireLogin,
@@ -556,8 +531,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     inspeksiFormProduct,
     closeInspeksiForm: () => setInspeksiFormOpen(false),
     submitInspeksi,
-    contactProduct,
-    closeContact: () => setContactProduct(null),
     toasts,
     pushToast,
   };

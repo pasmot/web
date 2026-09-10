@@ -23,7 +23,6 @@ export function ProductBinding({ product }: { product: Product }) {
       onOpenProduct={app.openProduct}
       onToggleSave={app.toggleSave}
       onRequestInspeksi={(p) => app.requestInspeksi(p)}
-      onContactSeller={app.contactSeller}
       onOpenDealer={app.openDealer}
     />
   );

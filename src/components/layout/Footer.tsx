@@ -40,10 +40,9 @@ export function Footer({ onNavigate }: FooterProps) {
         <div className="footer-grid">
           <div>
             <div className="footer-brand">
-              <img src="/PM - Logo_Final_White.svg" alt="PasarMotor" />
-              <span>
-                Pasar<em>Motor</em>
-              </span>
+              {/* Lockup horizontal versi putih — wordmark-nya sudah bagian dari
+                  logo, jadi tidak ditulis ulang sebagai teks. */}
+              <img src="/brand/pm-logo-horizontal-white.svg" alt="PasarMotor" />
             </div>
             <p className="footer-desc">
               Marketplace otomotif dengan pasar terkurasi, Montir AI, dan jasa

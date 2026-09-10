@@ -251,8 +251,6 @@ export function mapListing(raw: ApiListing): Product {
     mileage: '',
     seller: raw.seller_name?.trim() || `seller-${raw.seller_id}`,
     sellerName: raw.seller_name?.trim() || undefined,
-    sellerPhone:
-      raw.seller_whatsapp?.trim() || raw.seller_phone?.trim() || undefined,
   };
 }
 
@@ -321,8 +319,6 @@ function mapDetail(detail: ApiListingDetail): Product {
     description: listing.description?.trim() || undefined,
     seller: seller?.name?.trim() || base.seller,
     sellerName: seller?.name?.trim() || base.sellerName,
-    sellerPhone:
-      seller?.whatsapp?.trim() || seller?.phone?.trim() || base.sellerPhone,
     rating: Number.isFinite(rating) && rating > 0 ? rating : undefined,
     year: year ? String(year) : base.year,
     location: locationOf(listing.city, listing.province, seller?.city),

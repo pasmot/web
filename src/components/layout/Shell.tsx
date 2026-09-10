@@ -11,7 +11,6 @@ import { Footer } from './Footer';
 import { MontirDock } from '../chat/MontirDock';
 import { LoginGateModal } from '../auth/LoginGateModal';
 import { InspeksiFormModal } from '../modals/InspeksiFormModal';
-import { ContactSellerModal } from '../modals/ContactSellerModal';
 
 export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -98,12 +97,6 @@ export function Shell({ children }: { children: ReactNode }) {
           app.closeInspeksiForm();
           app.exploreCatalog();
         }}
-      />
-
-      <ContactSellerModal
-        open={app.contactProduct !== null}
-        product={app.contactProduct}
-        onClose={app.closeContact}
       />
 
       <div className="toast-wrap" aria-live="polite">

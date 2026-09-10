@@ -39,11 +39,6 @@ export type Product = {
    */
   sellerName?: string;
   /**
-   * Nomor WhatsApp/HP penjual (kalau datanya ada). Dipakai sebagai tujuan chat;
-   * kalau kosong, chat diarahkan ke nomor resmi PASARMOTOR.
-   */
-  sellerPhone?: string;
-  /**
    * Unused on the PDP — like the mobile app, the description shown there is
    * derived from title/year/mileage/cc since crawled data can be incomplete.
    */

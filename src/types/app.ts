@@ -18,5 +18,4 @@ export type PendingAction =
   | { kind: 'saved-view' }
   | { kind: 'inspeksi-view' }
   | { kind: 'inspeksi'; product: Product | null }
-  | { kind: 'contact-seller'; productId: string }
   | { kind: 'chat-continue'; message: string };

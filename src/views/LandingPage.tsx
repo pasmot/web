@@ -273,7 +273,7 @@ export function LandingPage({
           <div className="app-exclusive">
             <div className="app-exclusive-head">
               <h2 className="section-title">
-                Website untuk incer barang. Transaksinya di Apps.
+                Website untuk incar barang. Transaksinya di Apps.
               </h2>
               <p className="section-sub" style={{ marginInline: "auto" }}>
                 Di web kamu bisa menjelajah, bertanya, dan menyimpan incaran.

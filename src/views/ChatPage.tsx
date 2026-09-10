@@ -49,7 +49,9 @@ export function ChatPage({ chat, isLoggedIn, onOpenProduct }: ChatPageProps) {
     <div className="chat-page">
       <div className="chat-page-head">
         <div className="chat-page-head-inner">
-          <img src="/brand/montir-ai-logo.png" alt="" />
+          <span className="chat-page-head-spark">
+            <Sparkles size={26} />
+          </span>
           <div>
             <strong>{montirIntro.name}</strong>
             <small>{montirIntro.tagline}</small>

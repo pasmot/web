@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Clock3,
   MapPin,
-  MessageCircle,
   Wrench,
 } from 'lucide-react';
 import type { Product } from '../types/product';
@@ -24,7 +23,6 @@ type ProductDetailPageProps = {
   onOpenProduct: (product: Product) => void;
   onToggleSave: (product: Product) => void;
   onRequestInspeksi: (product: Product) => void;
-  onContactSeller: (product: Product) => void;
   onOpenDealer: (dealerId: string) => void;
 };
 
@@ -35,7 +33,6 @@ export function ProductDetailPage({
   onOpenProduct,
   onToggleSave,
   onRequestInspeksi,
-  onContactSeller,
   onOpenDealer,
 }: ProductDetailPageProps) {
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -180,14 +177,6 @@ export function ProductDetailPage({
                     Ajukan Inspeksi
                   </Button>
                 )}
-                <Button
-                  variant="dark"
-                  style={{ gridColumn: '1 / -1' }}
-                  onClick={() => onContactSeller(product)}
-                >
-                  <MessageCircle size={17} />
-                  Hubungi Penjual
-                </Button>
               </div>
             </div>
 

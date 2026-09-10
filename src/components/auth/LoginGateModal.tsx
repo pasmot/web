@@ -43,7 +43,7 @@ export function LoginGateModal({
       <div className="login-gate">
         <img
           className="login-gate-logo"
-          src="/brand/pasarmotor-logo.png"
+          src="/brand/pm-logo-stacked.png"
           alt="PasarMotor"
         />
         <h2>Masuk ke PasarMotor</h2>
