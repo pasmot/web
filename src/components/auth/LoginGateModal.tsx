@@ -53,8 +53,8 @@ export function LoginGateModal({
           </div>
         )}
         <p>
-          Login dulu untuk lanjut — setelah masuk, aksi kamu otomatis diteruskan tanpa
-          mengulang dari awal.
+          Login dulu untuk lanjut. Setelah masuk, aksi kamu langsung
+          diteruskan.
         </p>
         <button className="google-btn" onClick={onLogin}>
           <img src={GOOGLE_ICON} alt="" />

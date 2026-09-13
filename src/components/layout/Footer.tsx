@@ -45,8 +45,8 @@ export function Footer({ onNavigate }: FooterProps) {
               <img src="/brand/pm-logo-horizontal-white.svg" alt="PasarMotor" />
             </div>
             <p className="footer-desc">
-              Marketplace otomotif dengan pasar terkurasi, Montir AI, dan jasa
-              inspeksi — supaya keputusan jual-beli motor terasa lebih aman dan jelas.
+              Marketplace motor dengan seller terverifikasi, Montir AI, dan jasa
+              inspeksi.
             </p>
           </div>
 

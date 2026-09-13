@@ -34,7 +34,7 @@ const APP_FEATURES = [
   {
     icon: CreditCard,
     title: "Checkout & Pembayaran",
-    desc: "VA, QRIS, e-wallet, dan COD dengan perlindungan transaksi penuh.",
+    desc: "VA, QRIS, e-wallet, dan COD. Transaksi lewat Apps.",
   },
   {
     icon: Store,
@@ -44,7 +44,7 @@ const APP_FEATURES = [
   {
     icon: PackageSearch,
     title: "Transaksi & Tracking",
-    desc: "Pantau pesanan dan status pengiriman unit secara real-time.",
+    desc: "Pantau pesanan dan status pengiriman unit.",
   },
   {
     icon: Bell,
@@ -76,8 +76,8 @@ const VALUE_PROPS = [
   },
   {
     icon: Bot,
-    title: "Montir AI",
-    desc: "Montir AI bantu rekomendasi, cek risiko, dan bandingkan unit — dari riset awal sampai keputusan akhir.",
+    title: "Tanya Montir AI",
+    desc: "Montir AI bantu rekomendasi, cek risiko, dan bandingkan unit sebelum transaksi. Dari riset awal sampai keputusan akhir.",
   },
 ];
 
@@ -90,7 +90,7 @@ export function LandingPage({
 }: LandingPageProps) {
   const { categories } = useCategories();
 
-  // "Unit pilihan minggu ini" comes from the live motor catalog; fall back to
+  // "Unit Pilihan" comes from the live motor catalog; fall back to
   // the static picks if the API returns nothing (so the section stays filled).
   const { products: fetchedFeatured, loading: featuredLoading } =
     useFeaturedListings(4);
@@ -181,10 +181,10 @@ export function LandingPage({
         <div className="container">
           <div className="section-head">
             <div>
-              <h2 className="section-title">Unit pilihan minggu ini</h2>
+              <h2 className="section-title">Unit Pilihan</h2>
               <p className="section-sub">
-                Dipilih dari seller terverifikasi dengan data produk lengkap dan
-                harga wajar di pasaran.
+                Dipilih dari seller terverifikasi, dengan data produk yang
+                lengkap.
               </p>
             </div>
             <Button variant="outline" onClick={() => onExploreCatalog()}>
@@ -211,17 +211,16 @@ export function LandingPage({
               <h2>
                 Tanya Montir AI
                 <br />
-                Sebelum kamu nego.
+                Sebelum kamu pilih unit.
               </h2>
               <p>
-                Asisten yang paham motor: minta rekomendasi sesuai budget, cek
-                risiko unit bekas, bandingkan pilihan, dan tahu kapan waktunya
-                inspeksi.
+                Minta rekomendasi sesuai budget, cek risiko unit bekas,
+                bandingkan pilihan, dan tanya kapan perlu inspeksi.
               </p>
               <ul className="ai-highlight-points">
                 <li>
                   <CheckCircle2 size={16} />
-                  Rekomendasi unit sesuai budget dan kebutuhan harianmu
+                  Rekomendasi unit sesuai budget dan pemakaian
                 </li>
                 <li>
                   <CheckCircle2 size={16} />
@@ -276,9 +275,8 @@ export function LandingPage({
                 Website untuk incar barang. Transaksinya di Apps.
               </h2>
               <p className="section-sub" style={{ marginInline: "auto" }}>
-                Di web kamu bisa menjelajah, bertanya, dan menyimpan incaran.
-                Begitu siap bertransaksi, semua kemampuan penuh PasarMotor
-                menunggu di Apps.
+                Di web kamu bisa jelajah, tanya Montir, dan simpan incaran.
+                Bayar, jual, dan tracking-nya di Apps.
               </p>
               <StoreBadges />
             </div>

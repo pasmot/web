@@ -21,18 +21,18 @@ export const CATEGORY_META: Record<
 > = {
   motor: {
     name: 'Motor',
-    description: 'Motor baru & bekas terkurasi',
+    description: 'Baru dan bekas',
     image:
       'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80',
   },
   'spare-part-motor': {
     name: 'Spare Part',
-    description: 'Part original & aftermarket',
+    description: 'Original dan Aftermarket',
     image: '/sparepart.png',
   },
   'aksesoris-motor': {
     name: 'Aksesoris',
-    description: 'Helm, jaket, gear riding & lainnya',
+    description: 'Helm, jaket, dan gear riding',
     image:
       'https://images.unsplash.com/photo-1627530980937-b8721b91506a?auto=format&fit=crop&w=900&q=80',
   },

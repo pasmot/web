@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import '../styles/tokens.css';
 import '../styles/globals.css';
 import '../styles/landing.css';
@@ -12,10 +12,10 @@ import '../styles/seller.css';
 import { AppProvider } from '../context/AppContext';
 import { Shell } from '../components/layout/Shell';
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-plus-jakarta',
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pasarmotor.com';
@@ -52,7 +52,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={inter.variable} data-scroll-behavior="smooth">
+    <html
+      lang="id"
+      className={plusJakartaSans.variable}
+      data-scroll-behavior="smooth"
+    >
       <body>
         <AppProvider>
           <Shell>{children}</Shell>
