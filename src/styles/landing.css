@@ -621,6 +621,15 @@
 }
 
 @media (max-width: 560px) {
+  /* Phone mockups add no value at this width — drop them entirely */
+  .hero {
+    padding-bottom: 44px;
+  }
+
+  .hero-showcase {
+    display: none;
+  }
+
   .value-grid,
   .app-feature-grid {
     grid-template-columns: 1fr;
